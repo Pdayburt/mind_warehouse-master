@@ -1,0 +1,214 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.mind.mind_warehouse.mapper.WarehouseDamageMapper">
+  <resultMap id="BaseResultMap" type="com.mind.mind_warehouse.entity.WarehouseDamage">
+    <id column="id" jdbcType="INTEGER" property="id" />
+    <result column="damage_num" jdbcType="VARCHAR" property="damageNum" />
+    <result column="type" jdbcType="INTEGER" property="type" />
+    <result column="code" jdbcType="VARCHAR" property="code" />
+    <result column="product_id" jdbcType="INTEGER" property="productId" />
+    <result column="damage_num" jdbcType="INTEGER" property="damageNum" />
+    <result column="batch" jdbcType="VARCHAR" property="batch" />
+    <result column="warehouse_id" jdbcType="INTEGER" property="warehouseId" />
+    <result column="old_storage_id" jdbcType="INTEGER" property="oldStorageId" />
+    <result column="create_time" jdbcType="TIMESTAMP" property="createTime" />
+    <result column="update_time" jdbcType="TIMESTAMP" property="updateTime" />
+    <result column="is_delete" jdbcType="INTEGER" property="isDeleate" />
+  </resultMap>
+  <delete id="deleteByPrimaryKey" parameterType="java.lang.Integer">
+    delete from mw_warehouse_damage
+    where id = #{id,jdbcType=INTEGER}
+  </delete>
+  
+  
+  
+  
+  
+  <resultMap id="WarehouseDamageMap" type="WarehouseDamageVo" autoMapping="true">
+    <id column="wdid" property="wdid"></id>
+  </resultMap>
+    
+    
+    
+    
+    <insert id="insertWarehouseDamage" parameterType="WarehouseDamageVo" useGeneratedKeys="true" keyProperty="wdid" keyColumn="id">
+        insert into mw_warehouse_damage (code,type,product_id,damage_num,batch,warehouse_id,old_storage_id,damage_storage_id,create_time,update_time,is_delete,note)
+        values
+        (#{wdcode},#{wdtype},#{productId},#{damageNum},#{batch},#{warehouseId},#{oldStorageId},#{damageStorageId},#{createTime},#{updateTime},0,#{wdnote})
+    </insert>
+
+
+    <delete id="deleteWarehouseDamageByKey" parameterType="int">
+        delete from mw_warehouse_damage
+        where id = #{wdid}
+    </delete>
+
+
+    <update id="updateWarehouseDamageByKey" parameterType="WarehouseDamageVo">
+        update mw_warehouse_damage
+        set
+        type = #{wdtype},
+        note = #{wdnote},
+        damage_num = #{damageNum},
+        update_time = #{updateTime},
+        create_time = #{createTime},
+        is_delete = 0
+        where id = #{wdid}
+    </update>
+
+
+    <select id="selectStockId" resultType="int">
+        SELECT id
+        FROM  mw_product_stock
+        where product_id = #{productId}
+    </select>
+
+    <select id="selectProduct" resultMap="WarehouseDamageMap">
+        SELECT ps.id as psid,ps.product_id as productId, p.name as pname,p.code as pcode,p.standards,pt.name as ptname,u.name as uname,p.pakage_type as packageType,p.weight, p.price
+        FROM mw_product_stock ps LEFT JOIN mw_product p
+                                           on ps.product_id = p.id
+                                 LEFT JOIN mw_product_type pt
+                                           on p.type_id = pt.id
+                                 LEFT JOIN mw_units u
+                                           on p.store_unit_id = u.id
+        <where>
+            <if test="pcode != null and pcode.toString().trim() != ''">
+                and p.code like '%${pcode}%'
+            </if>
+            <if test="pname != null and pname.toString().trim() != ''">
+                and p.name like '%${pname}%'
+            </if>
+        </where>
+        ORDER BY psid ASC
+    </select>
+
+
+
+    <select id="selectAllProductPlus" resultMap="WarehouseDamageMap">
+        SELECT ps.id as psid,ps.product_id as productId,ps.stock, p.name as pname,p.code as pcode,p.standards,pt.name as ptname,u.name as uname,p.pakage_type as packageType,p.weight,
+        p.price,w.name as wname,w.id as warehouseId,
+        s.id as storageId,s.name as sname
+        FROM mw_product_stock ps LEFT JOIN mw_product p
+        on ps.product_id = p.id
+        LEFT JOIN mw_product_type pt
+        on p.type_id = pt.id
+        LEFT JOIN mw_units u
+        on p.store_unit_id = u.id
+        LEFT JOIN mw_warehouse w
+        on ps.warehouse_id = w.id
+        LEFT JOIN mw_storage s
+        on ps.storage_id = s.id
+        <where>
+            <if test="pcode != null and pcode.toString().trim() != ''">
+                and p.code like '%${pcode}%'
+            </if>
+            <if test="pname != null and pname.toString().trim() != ''">
+                and p.name like '%${pname}%'
+            </if>
+        </where>
+        ORDER BY psid ASC
+    </select>
+    
+    
+    
+    <select id="selectAllProduct" resultMap="WarehouseDamageMap">
+        SELECT ps.id as psid,ps.product_id as productId, p.name as pname,p.code as pcode,p.standards,pt.name as ptname,u.name as uname,p.pakage_type as packageType,p.weight,
+               wd.batch,p.price,wd.damage_num as damageNum,w.name as wname,w.id as warehouseId,os.name as osname,
+               os.id as oldStorageId,ns.name as nsname,ns.id as damageStorageId,
+               wd.create_time as createTime
+        FROM mw_product_stock ps LEFT JOIN mw_product p
+                                           on ps.product_id = p.id
+                                 LEFT JOIN mw_warehouse_damage wd
+                                           on ps.product_id = wd.product_id
+                                 LEFT JOIN mw_storage ns
+                                           on wd.damage_storage_id = ns.id
+                                 LEFT JOIN mw_warehouse w
+                                           on wd.warehouse_id = w.id
+                                 LEFT JOIN  mw_storage os
+                                            on wd.old_storage_id = os.id
+                                 LEFT JOIN mw_product_type pt
+                                            on p.type_id = pt.id
+                                 LEFT JOIN mw_units u
+                                            on p.store_unit_id = u.id
+        <where>
+            <if test="pcode != null and pcode.toString().trim() != ''">
+                and p.code like '%${pcode}%'
+            </if>
+            <if test="pname != null and pname.toString().trim() != ''">
+                and p.name like '%${pname}%'
+            </if>
+        </where>
+        ORDER BY psid ASC
+    </select>
+
+
+    <select id="selectWarehouseDamageById" resultMap="WarehouseDamageMap">
+        SELECT wd.id as wdid, wd.code as wdcode,wd.batch,wd.damage_num as damageNum,p.name as pname,p.code as pcode,p.standards,p.price,ps.stock,w.name as wname,os.name as osname,ns.name as nsname,wd.type as wdtype,
+               wd.`note` as wdnote,wd.create_time as createTime
+        FROM mw_warehouse_damage wd LEFT JOIN mw_product p
+                                              on wd.product_id = p.id
+                                    LEFT JOIN mw_warehouse w
+                                              on wd.warehouse_id = w.id
+                                    LEFT JOIN mw_storage os
+                                              on wd.old_storage_id = os.id
+                                    LEFT JOIN mw_storage as ns
+                                              on wd.damage_storage_id = ns.id
+                                    LEFT JOIN mw_product_stock ps
+                                              on wd.product_id = ps.product_id
+        where wd.is_delete = 0 and wd.id = #{wdid}
+
+
+    </select>
+  
+  
+  <select id="selectWarehouseDamageByCons" resultMap="WarehouseDamageMap">
+    SELECT wd.id as wdid, wd.code as wdcode,wd.product_id as productId,wd.batch,wd.damage_num as damageNum,p.name as pname,p.code as pcode,p.standards,w.name as wname,os.name as osname,ns.name as nsname,wd.type as wdtype,
+      wd.`note` as wdnote,wd.create_time as createTime
+    FROM mw_warehouse_damage wd LEFT JOIN mw_product p
+                                          on wd.product_id = p.id
+                                LEFT JOIN mw_warehouse w
+                                          on wd.warehouse_id = w.id
+                                LEFT JOIN mw_storage os
+                                          on wd.old_storage_id = os.id
+                                LEFT JOIN mw_storage as ns
+                                          on wd.damage_storage_id = ns.id
+    <where>
+      <if test="wdtype != 0">
+          and wd.type = #{wdtype}
+      </if>
+      <if test="wdcode != null and wdcode.toString().trim() != ''">
+          and wd.code like '%${wdcode}%'
+      </if>
+        and wd.is_delete = 0
+    </where>
+  </select>
+
+
+    <!--    List<WarehouseDamageVo> selectByIds(@Param("ids")int[] ids);-->
+    <select id="selectByIds" resultMap="WarehouseDamageMap">
+        SELECT wd.id as wdid, wd.code as wdcode,wd.product_id as productId,wd.batch,wd.damage_num as damageNum,p.name as pname,p.code as pcode,p.standards,w.name as wname,os.name as osname,ns.name as nsname,wd.type as wdtype,
+        wd.`note` as wdnote,wd.create_time as createTime
+        FROM mw_warehouse_damage wd LEFT JOIN mw_product p
+        on wd.product_id = p.id
+        LEFT JOIN mw_warehouse w
+        on wd.warehouse_id = w.id
+        LEFT JOIN mw_storage os
+        on wd.old_storage_id = os.id
+        LEFT JOIN mw_storage as ns
+        on wd.damage_storage_id = ns.id
+
+        <where>
+            <foreach collection="ids" separator="," open="wd.id in(" close=")" item="id">
+                #{id}
+            </foreach>
+        </where>
+    </select>
+    
+  
+  
+  
+  
+  
+  
+
+</mapper>

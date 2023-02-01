@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.mind.mind_warehouse.mapper.WarehouseInOutMapper">
+  <resultMap id="BaseResultMap" type="com.mind.mind_warehouse.entity.WarehouseInOut">
+    <id column="id" jdbcType="INTEGER" property="id" />
+    <result column="change_id" jdbcType="INTEGER" property="changeId" />
+    <result column="form_emp_id" jdbcType="INTEGER" property="formEmpId" />
+    <result column="audit_emp_id" jdbcType="INTEGER" property="auditEmpId" />
+    <result column="audit_time" jdbcType="TIMESTAMP" property="auditTime" />
+    <result column="status" jdbcType="INTEGER" property="status" />
+    <result column="related_order_num" jdbcType="VARCHAR" property="relatedOrderNum" />
+    <result column="note" jdbcType="VARCHAR" property="note" />
+    <result column="create_time" jdbcType="TIMESTAMP" property="createTime" />
+    <result column="update_time" jdbcType="TIMESTAMP" property="updateTime" />
+    <result column="is_delete" jdbcType="INTEGER" property="isDelete" />
+  </resultMap>
+  <delete id="deleteByPrimaryKey" parameterType="java.lang.Integer">
+    delete from mw_warehouse_in_out
+    where id = #{id,jdbcType=INTEGER}
+  </delete>
+  <insert id="insert" parameterType="com.mind.mind_warehouse.entity.WarehouseInOut">
+    insert into mw_warehouse_in_out (id, change_id, form_emp_id, 
+      audit_emp_id, audit_time, status, 
+      related_order_num, note,
+      create_time, update_time, is_delete
+      )
+    values (#{id,jdbcType=INTEGER}, #{changeId,jdbcType=INTEGER}, #{formEmpId,jdbcType=INTEGER}, 
+      #{auditEmpId,jdbcType=INTEGER}, #{auditTime,jdbcType=TIMESTAMP}, #{status,jdbcType=INTEGER}, 
+      #{relatedOrderNum,jdbcType=VARCHAR}, #{note,jdbcType=VARCHAR},
+      #{createTime,jdbcType=TIMESTAMP}, #{updateTime,jdbcType=TIMESTAMP}, #{isDelete,jdbcType=INTEGER}
+      )
+  </insert>
+  <update id="updateByPrimaryKey" parameterType="com.mind.mind_warehouse.entity.WarehouseInOut">
+    update mw_warehouse_in_out
+    set change_id = #{changeId,jdbcType=INTEGER},
+      form_emp_id = #{formEmpId,jdbcType=INTEGER},
+      audit_emp_id = #{auditEmpId,jdbcType=INTEGER},
+      audit_time = #{auditTime,jdbcType=TIMESTAMP},
+      status = #{status,jdbcType=INTEGER},
+      related_order_num = #{relatedOrderNum,jdbcType=VARCHAR},
+      batch = #{batch,jdbcType=VARCHAR},
+      note = #{note,jdbcType=VARCHAR},
+      create_time = #{createTime,jdbcType=TIMESTAMP},
+      update_time = #{updateTime,jdbcType=TIMESTAMP},
+      is_delete = #{isDelete,jdbcType=INTEGER}
+    where id = #{id,jdbcType=INTEGER}
+  </update>
+  <select id="selectByPrimaryKey" parameterType="java.lang.Integer" resultMap="BaseResultMap">
+    select id, change_id, form_emp_id, audit_emp_id, audit_time, status, related_order_num, 
+    batch, note, create_time, update_time, is_delete
+    from mw_warehouse_in_out
+    where id = #{id,jdbcType=INTEGER}
+  </select>
+  <select id="selectAll" resultMap="BaseResultMap">
+    select id, change_id, form_emp_id, audit_emp_id, audit_time, status, related_order_num, 
+    batch, note, create_time, update_time, is_delete
+    from mw_warehouse_in_out
+  </select>
+  
+
+
+  
+  
+  
+  
+  
+  
+  
+</mapper>

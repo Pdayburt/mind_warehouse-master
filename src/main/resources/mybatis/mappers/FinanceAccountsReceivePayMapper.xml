@@ -1,0 +1,199 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.mind.mind_warehouse.mapper.FinanceAccountsReceivePayMapper">
+    <resultMap id="BaseResultMap" type="com.mind.mind_warehouse.entity.FinanceAccountsReceivePay">
+        <id column="id" jdbcType="INTEGER" property="id"/>
+        <result column="serial_number" jdbcType="VARCHAR" property="serialNumber"/>
+        <result column="finance_type_id" jdbcType="INTEGER" property="financeTypeId"/>
+        <result column="related_id" jdbcType="INTEGER" property="relatedId"/>
+        <result column="money_account" jdbcType="DECIMAL" property="moneyAccount"/>
+        <result column="money_pay" jdbcType="DECIMAL" property="moneyPay"/>
+        <result column="money_remainder" jdbcType="DECIMAL" property="moneyRemainder"/>
+        <result column="type" jdbcType="TINYINT" property="type"/>
+        <result column="status" jdbcType="TINYINT" property="status"/>
+        <result column="create_time" jdbcType="TIMESTAMP" property="createTime"/>
+        <result column="update_time" jdbcType="TIMESTAMP" property="updateTime"/>
+        <result column="is_delete" jdbcType="TINYINT" property="isDelete"/>
+        <result column="name" property="name"></result>
+        <result column="dead_line" property="deadLine"></result>
+    </resultMap>
+    <delete id="deleteByPrimaryKey" parameterType="java.lang.Integer">
+        delete
+        from mw_finance_accounts_receive_pay
+        where id = #{id,jdbcType=INTEGER}
+    </delete>
+    <insert id="insert" parameterType="com.mind.mind_warehouse.entity.FinanceAccountsReceivePay">
+        insert into mw_finance_accounts_receive_pay (id, serial_number, finance_type_id,
+                                                     related_id, name, money_account, money_pay,
+                                                     money_remainder, type, status, dead_line,
+                                                     create_time, update_time, is_delete)
+        values (#{id,jdbcType=INTEGER}, #{serialNumber,jdbcType=VARCHAR}, #{financeTypeId,jdbcType=INTEGER},
+                #{relatedId,jdbcType=INTEGER}, #{name}, #{moneyAccount,jdbcType=DECIMAL}, #{moneyPay,jdbcType=DECIMAL},
+                #{moneyRemainder,jdbcType=DECIMAL}, #{type,jdbcType=TINYINT}, #{status,jdbcType=TINYINT}, #{deadLine},
+                #{createTime,jdbcType=TIMESTAMP}, #{updateTime,jdbcType=TIMESTAMP}, #{isDelete,jdbcType=TINYINT})
+    </insert>
+    <update id="updateByPrimaryKey" parameterType="com.mind.mind_warehouse.entity.FinanceAccountsReceivePay">
+        update mw_finance_accounts_receive_pay
+        set serial_number   = #{serialNumber,jdbcType=VARCHAR},
+            name=#{name},
+            finance_type_id = #{financeTypeId,jdbcType=INTEGER},
+            related_id      = #{relatedId,jdbcType=INTEGER},
+            money_account   = #{moneyAccount,jdbcType=DECIMAL},
+            money_pay       = #{moneyPay,jdbcType=DECIMAL},
+            money_remainder = #{moneyRemainder,jdbcType=DECIMAL},
+            type            = #{type,jdbcType=TINYINT},
+            status          = #{status,jdbcType=TINYINT},
+            dead_line=#{deadLine},
+            create_time     = #{createTime,jdbcType=TIMESTAMP},
+            update_time     = #{updateTime,jdbcType=TIMESTAMP},
+            is_delete       = #{isDelete,jdbcType=TINYINT}
+        where id = #{id,jdbcType=INTEGER}
+    </update>
+    <select id="selectByPrimaryKey" parameterType="java.lang.Integer" resultMap="BaseResultMap">
+        select id,
+               serial_number,
+               name,
+               finance_type_id,
+               related_id,
+               money_account,
+               money_pay,
+               money_remainder,
+               type,
+               status,
+               dead_line,
+               create_time,
+               update_time,
+               is_delete
+        from mw_finance_accounts_receive_pay
+        where id = #{id,jdbcType=INTEGER}
+    </select>
+    <select id="selectAll" resultMap="BaseResultMap">
+        select id,
+               serial_number,
+               name,
+               finance_type_id,
+               related_id,
+               money_account,
+               money_pay,
+               money_remainder,
+               type,
+               status,
+               dead_line,
+               create_time,
+               update_time,
+               is_delete
+        from mw_finance_accounts_receive_pay
+    </select>
+
+    <!--  List<FinanceAccountsReceivePay> selectByCons(@Param("serialNumber")Integer serialNumber,-->
+    <!--  @Param("name")String name,-->
+    <!--  @Param("financeTypeId")Integer financeTypeId,-->
+    <!--  @Param("status")Integer status,-->
+    <!--  @Param("relatedId")Integer relatedId);-->
+    <resultMap id="FinanceAccountsReceivePayVoMap" type="FinanceAccountsReceivePayVo" autoMapping="true">
+        <id column="id" property="id"></id>
+    </resultMap>
+
+  <select id="selectByCons" resultMap="FinanceAccountsReceivePayVoMap" >
+    select far.*,mc.name customerName from mw_finance_accounts_receive_pay far inner join mw_customer mc on far.related_id=mc.id
+<where>
+  far.type=1
+  <if test="serialNumber!=null and serialNumber!=''">
+    and far.serial_number like '%${serialNumber}%'
+  </if>
+  <if test="name!=null and name!=''">
+    and far.name like '%${name}%'
+  </if>
+  <if test="financeTypeId!=null">
+    and far.finance_type_id=#{financeTypeId}
+  </if>
+  <if test="status!=null">
+    and far.status =${status}
+  </if>
+  <if test="customerName!=null and customerName!=''">
+    and mc.name like '%${customerName}%'
+  </if>
+</where>
+  </select>
+<!--  List<FinanceAccountsReceivePayVo> selectPayByCons(@Param("serialNumber")Integer serialNumber,-->
+<!--  @Param("name")String name,-->
+<!--  @Param("financeTypeId")Integer financeTypeId,-->
+<!--  @Param("status")Integer status,-->
+<!--  @Param("supplierName")String  supplierName);-->
+  <select id="selectPayByCons" resultMap="FinanceAccountsReceivePayVoMap" >
+    select far.*,ms.name supplierName from mw_finance_accounts_receive_pay far inner join mw_supplier ms on far.related_id=ms.id
+    <where>
+      far.type=2
+      <if test="serialNumber!=null and serialNumber!=''">
+        and far.serial_number like '%${serialNumber}%'
+      </if>
+      <if test="name!=null and name!=''">
+        and far.name like '%${name}%'
+      </if>
+      <if test="financeTypeId!=null">
+        and far.finance_type_id=#{financeTypeId}
+      </if>
+      <if test="status!=null">
+        and far.status =#{status}
+      </if>
+      <if test="supplierName!=null and supplierName!=''">
+        and ms.name like '%${supplierName}%'
+      </if>
+    </where>
+  </select>
+<!--  List<ReceivePayVo> selectPayByConsBothCustomer(@Param("serialNumber")Integer serialNumber,-->
+<!--  @Param("name")String name,-->
+<!--  @Param("financeTypeId")Integer financeTypeId);-->
+
+
+  <resultMap id="ReceivePayVoMap" type="ReceivePayVo" autoMapping="true">
+    <id column="id" property="id"></id>
+  </resultMap>
+
+
+  <select id="selectPayByConsBothCustomer" resultMap="ReceivePayVoMap">
+    select far.*,mc.name partnerName from mw_finance_accounts_receive_pay far inner join mw_customer mc on far.related_id=mc.id
+    <where>
+      far.type=1
+      <if test="serialNumber!=null and serialNumber!=''">
+        and far.serial_number like '%${serialNumber}%'
+      </if>
+      <if test="name!=null and name!=''">
+        and far.name like '%${name}%'
+      </if>
+      <if test="financeTypeId!=null">
+        and far.finance_type_id=#{financeTypeId}
+      </if>
+    </where>
+  </select>
+
+  <!--  List<ReceivePayVo> selectPayByConsBothSupplier(@Param("serialNumber")Integer serialNumber,-->
+  <!--  @Param("name")String name,-->
+  <!--  @Param("financeTypeId")Integer financeTypeId);-->
+  <select id="selectPayByConsBothSupplier" resultMap="ReceivePayVoMap">
+    select far.*,ms.name partnerName from mw_finance_accounts_receive_pay far inner join mw_supplier ms on far.related_id=ms.id
+    <where>
+      far.type=2
+      <if test="serialNumber!=null and serialNumber!=''">
+        and far.serial_number like '%${serialNumber}%'
+      </if>
+      <if test="name!=null and name!=''">
+        and far.name like '%${name}%'
+      </if>
+      <if test="financeTypeId!=null">
+        and far.finance_type_id=#{financeTypeId}
+      </if>
+    </where>
+  </select>
+
+
+
+
+    <!--    int selectIdByTradeNo(String tradeNo);-->
+    <select id="selectIdByTradeNo" resultType="int">
+        select id
+        from mw_finance_accounts_receive_pay
+        where serial_number = #{tradeNo}
+    </select>
+
+</mapper>

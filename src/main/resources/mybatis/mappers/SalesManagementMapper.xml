@@ -1,0 +1,190 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.mind.mind_warehouse.mapper.SalesManagementMapper">
+    <resultMap id="BaseResultMap" type="com.mind.mind_warehouse.entity.SalesManagement">
+        <id column="id" jdbcType="INTEGER" property="id"/>
+        <result column="order_number" jdbcType="VARCHAR" property="orderNumber"/>
+        <result column="product_id" jdbcType="INTEGER" property="productId"/>
+        <result column="quantity" jdbcType="INTEGER" property="quantity"/>
+        <result column="total_price" jdbcType="DECIMAL" property="totalPrice"/>
+        <result column="customer_id" jdbcType="INTEGER" property="customerId"/>
+        <result column="order_total_price" jdbcType="DECIMAL" property="orderTotalPrice"/>
+        <result column="status" jdbcType="INTEGER" property="status"/>
+        <result column="is_pay" jdbcType="INTEGER" property="isPay"/>
+        <result column="tel" jdbcType="VARCHAR" property="tel"/>
+        <result column="contact" jdbcType="VARCHAR" property="contact"/>
+        <result column="deliver_date" jdbcType="TIMESTAMP" property="deliverDate"/>
+        <result column="type" jdbcType="INTEGER" property="type"/>
+        <result column="return_order" jdbcType="VARCHAR" property="returnOrder"/>
+        <result column="return_in_number" jdbcType="VARCHAR" property="returnInNumber"/>
+        <result column="emp_id" jdbcType="INTEGER" property="empId"/>
+        <result column="note" jdbcType="VARCHAR" property="note"/>
+        <result column="create_time" jdbcType="TIMESTAMP" property="createTime"/>
+        <result column="update_time" jdbcType="TIMESTAMP" property="updateTime"/>
+        <result column="is_delete" jdbcType="INTEGER" property="isDelete"/>
+    </resultMap>
+    <sql id="baseField">
+        id
+        ,order_number, product_id,
+                                         quantity, total_price, customer_id,
+                                         order_total_price, status, is_pay, tel, contact, deliver_date, `type`,
+                                         return_order, emp_id, note, create_time, update_time, is_delete
+    </sql>
+    <delete id="deleteByPrimaryKey" parameterType="java.lang.Integer">
+        delete
+        from mw_sales_management
+        where id = #{id,jdbcType=INTEGER}
+    </delete>
+    <insert id="insert" parameterType="com.mind.mind_warehouse.entity.SalesManagement">
+        insert into mw_sales_management (order_number, product_id,
+                                         quantity, total_price, customer_id,
+                                         order_total_price, status, is_pay, tel, contact, deliver_date, `type`,
+                                         return_order, emp_id, note, create_time, update_time, is_delete)
+        values (#{orderNumber,jdbcType=VARCHAR}, #{productId,jdbcType=INTEGER},
+                #{quantity,jdbcType=INTEGER}, #{totalPrice,jdbcType=DECIMAL}, #{customerId,jdbcType=INTEGER},
+                #{orderTotalPrice,jdbcType=DECIMAL}, #{status,jdbcType=INTEGER}, #{isPay,jdbcType=INTEGER},
+                #{tel,jdbcType=VARCHAR}, #{contact,jdbcType=VARCHAR}, #{deliverDate,jdbcType=TIMESTAMP},
+                #{type,jdbcType=INTEGER}, #{returnOrder,jdbcType=VARCHAR}, #{empId,jdbcType=INTEGER},
+                #{note,jdbcType=VARCHAR},
+                #{createTime,jdbcType=TIMESTAMP}, #{updateTime,jdbcType=TIMESTAMP}, #{isDelete,jdbcType=INTEGER})
+    </insert>
+    <update id="updateByPrimaryKey" parameterType="com.mind.mind_warehouse.entity.SalesManagement">
+        update mw_sales_management
+        set order_number      = #{orderNumber,jdbcType=VARCHAR},
+            product_id        = #{productId,jdbcType=INTEGER},
+            quantity          = #{quantity,jdbcType=INTEGER},
+            total_price       = #{totalPrice,jdbcType=DECIMAL},
+            customer_id       = #{customerId,jdbcType=INTEGER},
+            order_total_price = #{orderTotalPrice,jdbcType=DECIMAL},
+            status            = #{status,jdbcType=INTEGER},
+            is_pay            = #{isPay,jdbcType=INTEGER},
+            tel               = #{tel,jdbcType=VARCHAR},
+            contact           = #{contact,jdbcType=VARCHAR},
+            deliver_date      = #{deliverDate,jdbcType=TIMESTAMP},
+            `type`            = #{type,jdbcType=INTEGER},
+            return_order      = #{returnOrder,jdbcType=VARCHAR},
+            emp_id            = #{empId,jdbcType=INTEGER},
+            note              = #{note,jdbcType=VARCHAR},
+            update_time       = #{updateTime,jdbcType=TIMESTAMP},
+            is_delete         = #{isDelete,jdbcType=INTEGER}
+        where id = #{id,jdbcType=INTEGER}
+    </update>
+    <select id="selectByPrimaryKey" parameterType="java.lang.Integer" resultMap="BaseResultMap">
+        select
+        <include refid="baseField"/>
+        from mw_sales_management
+        where id = #{id,jdbcType=INTEGER}
+    </select>
+    <select id="selectAll" resultMap="BaseResultMap">
+        select
+        <include refid="baseField"/>
+        from mw_sales_management
+    </select>
+
+    <resultMap id="salesVoMap" type="com.mind.mind_warehouse.vo.SalesVo">
+        <result column="sid" jdbcType="VARCHAR" property="sid"/>
+        <result column="pcode" jdbcType="VARCHAR" property="pcode"/>
+        <result column="stock" jdbcType="INTEGER" property="stock"/>
+        <result column="pname" jdbcType="VARCHAR" property="pname"/>
+        <result column="uname" jdbcType="VARCHAR" property="uname"/>
+        <result column="ename" jdbcType="VARCHAR" property="empName"/>
+        <result column="cname" jdbcType="VARCHAR" property="cname"/>
+        <result column="standards" jdbcType="VARCHAR" property="standards"/>
+        <result column="customerCode" jdbcType="VARCHAR" property="customerCode"/>
+        <result column="price" jdbcType="DECIMAL" property="price"/>
+        <association property="salesManagement" javaType="SalesManagement" autoMapping="true"/>
+    </resultMap>
+
+    <!--    List<SalesVo> selectAllSalesVo();-->
+    <select id="selectAllSalesVo" resultMap="salesVoMap">
+        select s.id sid,s.*,p.name as pname,p.code as pcode,p.price,ps.stock,p.standards,u.`name` as uname,e.name as
+        ename,
+        c.name as cname, c.code as customerCode
+        from mw_sales_management s
+        LEFT JOIN mw_product p on s.product_id = p.id
+        LEFT JOIN mw_units u on p.store_unit_id = u.id
+        LEFT JOIN mw_product_stock ps on s.product_id = ps.product_id
+        LEFT JOIN mw_employee e on s.emp_id = e.id
+        LEFT JOIN mw_customer c on s.customer_id = c.id
+        <where>
+            s.is_delete = 0
+            <if test="orderNum != null and orderNum.toString().trim() != '' ">
+                and s.order_number like concat('%',#{orderNum},'%')
+            </if>
+            <if test="pcode != null and pcode.toString().trim() != '' ">
+                and p.code like concat('%',#{pcode},'%')
+            </if>
+            <if test="pname != null and pname.toString().trim() != '' ">
+                and p.name like concat('%',#{pname},'%')
+            </if>
+            <if test="status != null">
+                and s.status = #{status}
+            </if>
+        </where>
+    </select>
+
+    <!--    int addTradeNo(@Param("id") int id,@Param("tradeNo") String tradeNo);-->
+    <update id="addTradeNo" parameterType="com.mind.mind_warehouse.entity.SalesManagement">
+        update mw_sales_management
+        set trade_no    = #{tradeNo,jdbcType=VARCHAR},
+            update_time = #{updateTime,jdbcType=TIMESTAMP},
+            is_pay      = 1
+        where id = #{id,jdbcType=INTEGER}
+    </update>
+
+    <!--    List<SalesVo> selectAllReturnSalesVo(@Param("orderNum")String orderNum,-->
+    <!--    @Param("pcode")String pcode,-->
+    <!--    @Param("pname") String pname);-->
+    <select id="selectAllReturnSalesVo" resultMap="salesVoMap">
+        select s.id sid,s.*,p.name as pname,p.code as pcode,p.price,ps.stock,p.standards,u.`name` as uname,e.name as
+        ename,
+        c.name as cname, c.code as customerCode
+        from mw_sales_management s
+        LEFT JOIN mw_product p on s.product_id = p.id
+        LEFT JOIN mw_units u on p.store_unit_id = u.id
+        LEFT JOIN mw_product_stock ps on s.product_id = ps.product_id
+        LEFT JOIN mw_employee e on s.emp_id = e.id
+        LEFT JOIN mw_customer c on s.customer_id = c.id
+        <where>
+            s.is_delete = 0
+            <if test="returnNum != null and returnNum.toString().trim() != '' ">
+                and s.return_order like concat('%',#{returnNum},'%')
+            </if>
+            <if test="pcode != null and pcode.toString().trim() != '' ">
+                and p.code like concat('%',#{pcode},'%')
+            </if>
+            <if test="pname != null and pname.toString().trim() != '' ">
+                and p.name like concat('%',#{pname},'%')
+            </if>
+            and s.status in (2,3)
+        </where>
+    </select>
+
+    <!--    int addReturnInNum(@Param("id") int id,@Param("returnIn") String returnIn,@Param("updateTime") Date updateTime);-->
+    <update id="addReturnInNum" parameterType="com.mind.mind_warehouse.entity.SalesManagement">
+        update mw_sales_management
+        set return_in_number = #{returnIn,jdbcType=VARCHAR},
+            update_time      = #{updateTime,jdbcType=TIMESTAMP},
+            status           = 3
+        where id = #{id,jdbcType=INTEGER}
+    </update>
+
+    <!--    List<SalesVo> selectSalesVoByIds(int[] ids);-->
+    <select id="selectSalesVoByIds" resultMap="salesVoMap">
+        select s.id sid,s.*,p.name as pname,p.code as pcode,p.price,ps.stock,p.standards,u.`name` as uname,e.name as
+        ename,
+        c.name as cname, c.code as customerCode
+        from mw_sales_management s
+        LEFT JOIN mw_product p on s.product_id = p.id
+        LEFT JOIN mw_units u on p.store_unit_id = u.id
+        LEFT JOIN mw_product_stock ps on s.product_id = ps.product_id
+        LEFT JOIN mw_employee e on s.emp_id = e.id
+        LEFT JOIN mw_customer c on s.customer_id = c.id
+        <where>
+            s.is_delete = 0 and
+            <foreach collection="ids" item="id" open=" s.id in (" close=")" separator=",">
+                #{id}
+            </foreach>
+        </where>
+    </select>
+</mapper>

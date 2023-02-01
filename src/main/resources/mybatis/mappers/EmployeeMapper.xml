@@ -1,0 +1,130 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.mind.mind_warehouse.mapper.EmployeeMapper">
+  <resultMap id="BaseResultMap" type="com.mind.mind_warehouse.entity.Employee">
+    <id column="id" jdbcType="INTEGER" property="id" />
+    <result column="account" jdbcType="VARCHAR" property="account" />
+    <result column="password" jdbcType="VARCHAR" property="password" />
+    <result column="code" jdbcType="VARCHAR" property="code" />
+    <result column="name" jdbcType="VARCHAR" property="name" />
+    <result column="email" jdbcType="VARCHAR" property="email" />
+    <result column="tel" jdbcType="VARCHAR" property="tel" />
+    <result column="partment_id" jdbcType="INTEGER" property="partmentId" />
+    <result column="avatar" jdbcType="VARCHAR" property="avatar" />
+    <result column="status" jdbcType="INTEGER" property="status" />
+    <result column="creat_time" jdbcType="TIMESTAMP" property="creatTime" />
+    <result column="update_time" jdbcType="TIMESTAMP" property="updateTime" />
+    <result column="is_delete" jdbcType="INTEGER" property="isDelete" />
+  </resultMap>
+  <delete id="deleteByPrimaryKey" parameterType="java.lang.Integer">
+    delete from mw_employee
+    where id = #{id,jdbcType=INTEGER}
+  </delete>
+  <insert id="insert" parameterType="com.mind.mind_warehouse.entity.Employee">
+    insert into mw_employee (id, account, password,
+                             code, name, email,
+                             tel, partment_id, avatar,
+                             status, creat_time, update_time,
+                             is_delete)
+    values (#{id,jdbcType=INTEGER}, #{account,jdbcType=VARCHAR}, #{password,jdbcType=VARCHAR},
+            #{code,jdbcType=VARCHAR}, #{name,jdbcType=VARCHAR}, #{email,jdbcType=VARCHAR},
+            #{tel,jdbcType=VARCHAR}, #{partmentId,jdbcType=INTEGER}, #{avatar,jdbcType=VARCHAR},
+            #{status,jdbcType=INTEGER}, #{creatTime,jdbcType=TIMESTAMP}, #{updateTime,jdbcType=TIMESTAMP},
+            #{isDelete,jdbcType=INTEGER})
+  </insert>
+  <update id="updateByPrimaryKey" parameterType="com.mind.mind_warehouse.entity.Employee">
+    update mw_employee
+    set account = #{account,jdbcType=VARCHAR},
+        password = #{password,jdbcType=VARCHAR},
+        code = #{code,jdbcType=VARCHAR},
+        name = #{name,jdbcType=VARCHAR},
+        email = #{email,jdbcType=VARCHAR},
+        tel = #{tel,jdbcType=VARCHAR},
+        partment_id = #{partmentId,jdbcType=INTEGER},
+        avatar = #{avatar,jdbcType=VARCHAR},
+        status = #{status,jdbcType=INTEGER},
+        creat_time = #{creatTime,jdbcType=TIMESTAMP},
+        update_time = #{updateTime,jdbcType=TIMESTAMP},
+        is_delete = #{isDelete,jdbcType=INTEGER}
+    where id = #{id,jdbcType=INTEGER}
+  </update>
+  <select id="selectByPrimaryKey" parameterType="java.lang.Integer" resultMap="BaseResultMap">
+    select id, account, password, code, name, email, tel, partment_id, avatar, status,
+           creat_time, update_time, is_delete
+    from mw_employee
+    where id = #{id,jdbcType=INTEGER}
+  </select>
+  <select id="selectAll" resultMap="BaseResultMap">
+    select id, account, password, code, name, email, tel, partment_id, avatar, status,
+           creat_time, update_time, is_delete
+    from mw_employee
+  </select>
+  <select id="selectNameAndPwd" resultType="com.mind.mind_warehouse.entity.Employee">
+    select * from mw_employee where account = #{value}
+  </select>
+
+  <!--  List<Employee> selectEmployeeByCons(@Param("account")String account,-->
+  <!--  @Param("code")String code,-->
+  <!--  @Param("parentId")Integer parentId,-->
+  <!--  @Param("roleId")Integer roleId);-->
+  <resultMap id="EmployeeVoMap" type="EmployeeVo" autoMapping="true">
+    <id column="id" property="id"></id>
+    <result column="account" property="account"></result>
+      <result column="password" property="password"></result>
+    <result column="code" property="code"></result>
+    <result column="name" property="name"></result>
+    <result column="tel" property="tel"></result>
+    <result column="dname" property="dname"></result>
+    <result column="partment_id" property="partmentId"></result>
+    <collection property="roles" ofType="Role" fetchType="eager"
+                select="com.mind.mind_warehouse.mapper.RoleMapper.selectAllRolesByEmpId" column="id"></collection>
+  </resultMap>
+  <select id="selectEmployeeByCons" resultMap="EmployeeVoMap">
+    SELECT ee.id,ee.account,ee.password,ee.`code`,ee.`name`,ee.tel,ee.partment_id,ee.email,ee.status,ee.avatar,de.`name` dname
+    FROM mw_employee ee INNER JOIN mw_department de on ee.partment_id=de.id
+    <where>
+      <if test="account != null and account != ''">
+        and account like '%${account}%'
+      </if>
+      <if test="code != null and code != ''">
+        and code like '%${code}%'
+      </if>
+      <if test="parentId != null">
+        and partment_id=#{parentId}
+      </if>
+    </where>
+
+  </select>
+<!--    int updateByPEmployeeVo(EmployeeVo record);-->
+    <update id="updateByPEmployeeVo" parameterType="EmployeeVo">
+        update mw_employee
+        set account = #{account,jdbcType=VARCHAR},
+            password = #{password,jdbcType=VARCHAR},
+            code = #{code,jdbcType=VARCHAR},
+            name = #{name,jdbcType=VARCHAR},
+            email = #{email,jdbcType=VARCHAR},
+            tel = #{tel,jdbcType=VARCHAR},
+            partment_id = #{partmentId,jdbcType=INTEGER},
+            avatar = #{avatar,jdbcType=VARCHAR},
+            status = #{status,jdbcType=INTEGER},
+            creat_time = #{creatTime,jdbcType=TIMESTAMP},
+            update_time = #{updateTime,jdbcType=TIMESTAMP},
+            is_delete = #{isDelete,jdbcType=INTEGER}
+        where id = #{id,jdbcType=INTEGER}
+    </update>
+
+<!--    List<EmployeeVo> selectByIds(int[] ids);-->
+    <select id="selectByIds" resultMap="EmployeeVoMap">
+        SELECT ee.id,ee.account,ee.password,ee.`code`,ee.`name`,ee.tel,ee.partment_id,ee.email,ee.status,ee.avatar,de.`name` dname
+        FROM mw_employee ee INNER JOIN mw_department de on ee.partment_id=de.id
+        <where>
+         ee.id in
+        <foreach collection="ids" open="(" separator="," close=")" item="id">
+            #{id}
+        </foreach>
+        </where>
+
+    </select>
+
+
+</mapper>

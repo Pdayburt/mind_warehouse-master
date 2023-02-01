@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.mind.mind_warehouse.mapper.AuditLogMapper">
+  <resultMap id="BaseResultMap" type="com.mind.mind_warehouse.entity.AuditLog">
+    <id column="id" jdbcType="INTEGER" property="id" />
+    <result column="order_num" jdbcType="VARCHAR" property="orderNum" />
+    <result column="order_type" jdbcType="INTEGER" property="orderType" />
+    <result column="audit_op_id" jdbcType="INTEGER" property="auditOpId" />
+    <result column="op_type" jdbcType="INTEGER" property="opType" />
+    <result column="reason" jdbcType="VARCHAR" property="reason" />
+    <result column="result" jdbcType="INTEGER" property="result" />
+    <result column="error_type" jdbcType="INTEGER" property="errorType" />
+    <result column="op_time" jdbcType="TIMESTAMP" property="opTime" />
+  </resultMap>
+  <delete id="deleteByPrimaryKey" parameterType="java.lang.Integer">
+    delete from mw_audit_log
+    where id = #{id,jdbcType=INTEGER}
+  </delete>
+  <insert id="insert" parameterType="com.mind.mind_warehouse.entity.AuditLog">
+    insert into mw_audit_log (id, order_num, order_type, 
+      audit_op_id, op_type, reason, 
+      result, error_type, op_time
+      )
+    values (#{id,jdbcType=INTEGER}, #{orderNum,jdbcType=VARCHAR}, #{orderType,jdbcType=INTEGER}, 
+      #{auditOpId,jdbcType=INTEGER}, #{opType,jdbcType=INTEGER}, #{reason,jdbcType=VARCHAR}, 
+      #{result,jdbcType=INTEGER}, #{errorType,jdbcType=INTEGER}, #{opTime,jdbcType=TIMESTAMP}
+      )
+  </insert>
+  <update id="updateByPrimaryKey" parameterType="com.mind.mind_warehouse.entity.AuditLog">
+    update mw_audit_log
+    set order_num = #{orderNum,jdbcType=VARCHAR},
+      order_type = #{orderType,jdbcType=INTEGER},
+      audit_op_id = #{auditOpId,jdbcType=INTEGER},
+      op_type = #{opType,jdbcType=INTEGER},
+      reason = #{reason,jdbcType=VARCHAR},
+      result = #{result,jdbcType=INTEGER},
+      error_type = #{errorType,jdbcType=INTEGER},
+      op_time = #{opTime,jdbcType=TIMESTAMP}
+    where id = #{id,jdbcType=INTEGER}
+  </update>
+  <select id="selectByPrimaryKey" parameterType="java.lang.Integer" resultMap="BaseResultMap">
+    select id, order_num, order_type, audit_op_id, op_type, reason, result, error_type, 
+    op_time
+    from mw_audit_log
+    where id = #{id,jdbcType=INTEGER}
+  </select>
+  <select id="selectAll" resultMap="BaseResultMap">
+    select id, order_num, order_type, audit_op_id, op_type, reason, result, error_type, 
+    op_time
+    from mw_audit_log
+  </select>
+</mapper>

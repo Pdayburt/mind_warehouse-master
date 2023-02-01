@@ -1,0 +1,175 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.mind.mind_warehouse.mapper.WarehouseOutMapper">
+    <!--  <resultMap id="BaseResultMap" type="com.mind.mind_warehouse.entity.WarehouseOut">-->
+    <!--    <id column="id" jdbcType="INTEGER" property="id" />-->
+    <!--    <result column="type" jdbcType="INTEGER" property="type" />-->
+    <!--    <result column="order_num" jdbcType="VARCHAR" property="orderNum" />-->
+    <!--    <result column="customer_code" jdbcType="VARCHAR" property="customerCode" />-->
+    <!--    <result column="creat_time" jdbcType="TIMESTAMP" property="creatTime" />-->
+    <!--    <result column="update_time" jdbcType="TIMESTAMP" property="updateTime" />-->
+    <!--    <result column="is_deleate" jdbcType="INTEGER" property="isDeleate" />-->
+    <!--  </resultMap>-->
+
+    <resultMap id="outMap" type="WarehouseOutVo" autoMapping="true">
+        <id column="id" property="id"></id>
+    </resultMap>
+    <delete id="deleteByPrimaryKey" parameterType="java.lang.Integer">
+        delete from mw_warehouse_out
+        where id = #{id,jdbcType=INTEGER}
+    </delete>
+    <delete id="deleteWareOutAndProduct">
+        delete from mw_warehouse_in_out_sub where in_out_id = #{id,jdbcTypeName=INTEGER}
+    </delete>
+    <delete id="deleteWareOut">
+        delete from mw_warehouse_in_out  where change_id = #{value}
+    </delete>
+    <delete id="deleteCustomerOrder">
+        delete  from mw_customer where id = #{value}
+    </delete>
+<!--    批量删除-->
+    <delete id="deleteBatchByKeys">
+        delete from  mw_warehouse_out  where id in
+        <foreach collection="array" item="id" open="(" close=")" separator=",">
+            #{id}
+        </foreach>
+    </delete>
+    <delete id="deleteBatchWareIn">
+        delete from  mw_warehouse_in_out_sub where in_out_id in
+        <foreach collection="array" item="id" open="(" close=")" separator=",">
+            #{id}
+        </foreach>
+    </delete>
+    <!--    插入出库表-->
+    <insert id="insert" parameterType="com.mind.mind_warehouse.entity.WarehouseOut" useGeneratedKeys="true" keyProperty="id" keyColumn="id">
+        insert into mw_warehouse_out (type, order_num,
+                                      customer_code, create_time, update_time,
+                                      is_delete) values (#{type,jdbcType=INTEGER}, #{orderNum,jdbcType=VARCHAR},#{customerCode,jdbcType=VARCHAR}, #{createTime,jdbcType=TIMESTAMP}, #{updateTime,jdbcType=TIMESTAMP},
+                                                         0)
+    </insert>
+
+    <insert id="insertOutProduct">
+        insert into mw_warehouse_in_out_sub (in_out_id, product_id,
+                                             change_num,
+                                             is_delete)
+        values (#{inOutId,jdbcType=INTEGER}, #{productId,jdbcType=INTEGER},
+                #{changeNum,jdbcType=INTEGER},
+                0)
+    </insert>
+    <insert id="insertWarehouseOut">
+        insert into mw_warehouse_in_out (change_id, form_emp_id,
+                                         audit_emp_id, audit_time, status,
+                                         related_order_num, note,
+                                         create_time, update_time, is_delete
+        )
+        values (#{warehouseInOut.changeId,jdbcType=VARCHAR}, #{warehouseInOut.formEmpId,jdbcType=INTEGER},
+                #{warehouseInOut.auditEmpId,jdbcType=INTEGER}, #{warehouseInOut.auditTime,jdbcType=TIMESTAMP}, #{warehouseInOut.status,jdbcType=INTEGER},
+                #{warehouseInOut.relatedOrderNum,jdbcType=VARCHAR}, #{warehouseInOut.note,jdbcType=VARCHAR},
+                #{warehouseInOut.createTime,jdbcType=TIMESTAMP},now(), 0)
+    </insert>
+    <insert id="insertCustomerInfo">
+        insert into mw_customer (code, name, tel,
+                                 fax, email, contact,
+                                 address, creat_time, update_time,
+                                 is_delete)
+        values (#{customer.code,jdbcType=VARCHAR}, #{customer.name,jdbcType=VARCHAR}, #{customer.tel,jdbcType=VARCHAR},
+                #{customer.fax,jdbcType=VARCHAR}, #{customer.email,jdbcType=VARCHAR}, #{customer.contact,jdbcType=VARCHAR},
+                #{customer.address,jdbcType=VARCHAR}, now(),now(),
+                0)
+    </insert>
+
+
+    <update id="updateByPrimaryKey" parameterType="com.mind.mind_warehouse.vo.WarehouseOutVo">
+        update mw_warehouse_out
+        set type = #{type,jdbcType=INTEGER},
+            order_num = #{orderNum,jdbcType=VARCHAR},
+            customer_code = #{customerCode,jdbcType=VARCHAR},
+            create_time = #{createTime,jdbcType=TIMESTAMP},
+            update_time = #{updateTime,jdbcType=TIMESTAMP},
+            is_delete = #{isDelete,jdbcType=INTEGER}
+        where id = #{id,jdbcType=INTEGER}
+    </update>
+    <select id="selectByPrimaryKey" parameterType="java.lang.Integer" resultMap="outMap">
+        select id, type, order_num, customer_code, create_time, update_time, is_delete
+        from mw_warehouse_out
+        where id = #{id,jdbcType=INTEGER}
+    </select>
+    <select id="selectAll" resultMap="outMap">
+        select id, type, order_num, customer_code, create_time, update_time, is_deleate
+        from mw_warehouse_out
+    </select>
+
+    <select id="selectWareOutByCons" resultType="com.mind.mind_warehouse.vo.WarehouseOutVo">
+
+        select o.*,ios.*, io.*, c.*, e.*, o.order_num order_num,o.type ordertype,
+        c.name cname,c.code ccode,c.email cemail,p.code pcode,p.name pname,p.price price, ios.change_num, p.price*ios.change_num as totalprice,c.tel ctel,c.address,c.contact,e.name ename,io.create_time createtime,io.status,emp.name as aname,io.audit_time from mw_warehouse_out o
+        INNER JOIN mw_warehouse_in_out_sub ios on ios.in_out_id = o.id
+        INNER JOIN mw_warehouse_in_out io on io.change_id = o.order_num
+        inner JOIN mw_employee e on e.id = io.form_emp_id
+        INNER JOIN mw_product p on p.id = ios.product_id
+        inner JOIN mw_product_stock ps on ps.product_id = p.id
+        inner JOIN mw_units u on u.id = p.store_unit_id
+        INNER JOIN mw_warehouse mw on mw.id = ps.warehouse_id
+        INNER JOIN mw_storage ms on ms.id = ps.storage_id
+        inner JOIN mw_customer c on c.id = o.customer_code
+        inner JOIN mw_employee emp on emp.id = io.audit_emp_id
+
+        <where>
+            and o.is_delete = 0
+            <if test="orderNum !=null and orderNum.toString().trim() !='' ">
+                and o.order_num = #{orderNum}
+            </if>
+            <if test="cTel !=null and cTel.toString().trim() !='' ">
+                and c.tel = #{cTel}
+            </if>
+        </where>
+    </select>
+    <select id="selectProductStockByKey" resultType="java.lang.Integer">
+        select st.id sid
+        from mw_warehouse_in_out_sub s
+                 inner join mw_product_stock st
+                            on s.product_id = st.product_id
+        where s.id = #{id}
+    </select>
+    <select id="selectWareListByKey" resultMap="outMap">
+        select o.*, o.order_num order_num,o.type ordertype,
+               c.name cname,c.code ccode,c.email cemail,p.code pcode,p.name pname,p.price price,
+               ios.change_num, p.price*ios.change_num as totalprice,c.tel ctel,c.address,c.contact,
+               e.name ename,io.create_time createtime,io.status,e.name as aname,
+               io.audit_time from mw_warehouse_out o
+                                      INNER JOIN mw_warehouse_in_out_sub ios on ios.in_out_id = o.id
+                                      INNER JOIN mw_warehouse_in_out io on io.change_id = o.order_num
+                                      inner JOIN mw_employee e on e.id = io.form_emp_id
+                                      INNER JOIN mw_product p on p.id = ios.product_id
+                                      inner JOIN mw_product_stock ps on ps.product_id = p.id
+                                      inner JOIN mw_units u on u.id = p.store_unit_id
+                                      INNER JOIN mw_warehouse mw on mw.id = ps.warehouse_id
+                                      INNER JOIN mw_storage ms on ms.id = ps.storage_id
+                                      inner JOIN mw_customer c on c.id = o.customer_code
+                                      inner JOIN mw_employee emp on emp.id = io.audit_emp_id
+            and o.id = #{arg0}
+    </select>
+
+
+    <resultMap id="WarehouseMoveMap" type="WarehouseMoveVo" autoMapping="true">
+        <id column="id" property="id"></id>
+    </resultMap>
+
+
+
+    <select id="selectDelivery" resultMap="WarehouseMoveMap">
+        SELECT count(wo.order_num) as delivery
+        FROM mw_warehouse_out wo LEFT JOIN mw_warehouse_in_out wio
+                                           on wo.order_num = wio.change_id
+        where wio.status = 1
+    </select>
+
+    <select id="selectReadyForDelivery" resultMap="WarehouseMoveMap">
+        SELECT count(wo.order_num) as readyForDelivery
+        FROM mw_warehouse_out wo LEFT JOIN mw_warehouse_in_out wio
+                                           on wo.order_num = wio.change_id
+        where wio.status = 0
+    </select>
+
+
+</mapper>

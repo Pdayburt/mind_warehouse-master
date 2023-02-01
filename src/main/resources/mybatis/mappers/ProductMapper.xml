@@ -1,0 +1,164 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.mind.mind_warehouse.mapper.ProductMapper">
+  <resultMap id="BaseResultMap" type="com.mind.mind_warehouse.entity.Product">
+    <id column="id" jdbcType="INTEGER" property="id" />
+    <result column="code" jdbcType="VARCHAR" property="code" />
+    <result column="name" jdbcType="VARCHAR" property="name" />
+    <result column="firm_code" jdbcType="VARCHAR" property="firmCode" />
+    <result column="inner_code" jdbcType="VARCHAR" property="innerCode" />
+<!--    <result column="standards_unit_id" jdbcType="INTEGER" property="standardsUnitId" />-->
+    <result column="type_id" jdbcType="INTEGER" property="typeId" />
+    <result column="standards" jdbcType="VARCHAR" property="standards" />
+    <result column="store_unit_id" jdbcType="INTEGER" property="storeUnitId" />
+    <result column="pakage_type" jdbcType="INTEGER" property="pakageType" />
+    <result column="price" jdbcType="DECIMAL" property="price" />
+    <result column="storage_warning_upper" jdbcType="INTEGER" property="storageWarningUpper" />
+    <result column="storage_warning_down" jdbcType="INTEGER" property="storageWarningDown" />
+    <result column="weight" jdbcType="DECIMAL" property="weight" />
+    <result column="default_supplier_id" jdbcType="INTEGER" property="defaultSupplierId" />
+    <result column="create_time" jdbcType="TIMESTAMP" property="createTime" />
+    <result column="update_time" jdbcType="TIMESTAMP" property="updateTime" />
+    <result column="is_delete" jdbcType="INTEGER" property="isDelete" />
+  </resultMap>
+  <delete id="deleteByPrimaryKey" parameterType="java.lang.Integer">
+    delete from mw_product
+    where id = #{id,jdbcType=INTEGER}
+  </delete>
+  <insert id="insert" parameterType="com.mind.mind_warehouse.entity.Product" useGeneratedKeys="true" keyProperty="id" keyColumn="id">
+    insert into mw_product (id, code, name, 
+      firm_code, inner_code, standards,type_id,
+      store_unit_id, pakage_type, price, 
+      storage_warning_upper, storage_warning_down, 
+      weight, default_supplier_id, create_time, 
+      update_time, is_delete)
+    values (#{id,jdbcType=INTEGER}, #{code,jdbcType=VARCHAR}, #{name,jdbcType=VARCHAR}, 
+      #{firmCode,jdbcType=VARCHAR}, #{innerCode,jdbcType=VARCHAR}, #{standards},#{typeId},
+      #{storeUnitId,jdbcType=INTEGER}, #{pakageType,jdbcType=INTEGER}, #{price,jdbcType=DECIMAL}, 
+      #{storageWarningUpper,jdbcType=INTEGER}, #{storageWarningDown,jdbcType=INTEGER}, 
+      #{weight,jdbcType=DECIMAL}, #{defaultSupplierId,jdbcType=INTEGER}, #{createTime,jdbcType=TIMESTAMP}, 
+      #{updateTime,jdbcType=TIMESTAMP}, #{isDelete,jdbcType=INTEGER})
+  </insert>
+<!--  standards = #{standardsUnitId,jdbcType=INTEGER}-->
+  <update id="updateByPrimaryKey" parameterType="com.mind.mind_warehouse.entity.Product">
+    update mw_product
+    set code = #{code,jdbcType=VARCHAR},
+      name = #{name,jdbcType=VARCHAR},
+      firm_code = #{firmCode,jdbcType=VARCHAR},
+      inner_code = #{innerCode,jdbcType=VARCHAR},
+        standards=#{standards}  ,
+        type_id=#{typeId},
+      store_unit_id = #{storeUnitId,jdbcType=INTEGER},
+      pakage_type = #{pakageType,jdbcType=INTEGER},
+      price = #{price,jdbcType=DECIMAL},
+      storage_warning_upper = #{storageWarningUpper,jdbcType=INTEGER},
+      storage_warning_down = #{storageWarningDown,jdbcType=INTEGER},
+      weight = #{weight,jdbcType=DECIMAL},
+      default_supplier_id = #{defaultSupplierId,jdbcType=INTEGER},
+      create_time = #{createTime,jdbcType=TIMESTAMP},
+      update_time = #{updateTime,jdbcType=TIMESTAMP},
+      is_delete = #{isDelete,jdbcType=INTEGER}
+    where id = #{id,jdbcType=INTEGER}
+  </update>
+  <select id="selectByPrimaryKey" parameterType="java.lang.Integer" resultMap="BaseResultMap">
+    select id, code, name, firm_code, inner_code, standards,type_id, store_unit_id, pakage_type,
+    price, storage_warning_upper, storage_warning_down, weight, default_supplier_id, 
+    create_time, update_time, is_delete
+    from mw_product
+    where id = #{id,jdbcType=INTEGER}
+  </select>
+  <select id="selectAll" resultMap="BaseResultMap">
+    select id, code, name, firm_code, inner_code, standards, store_unit_id, pakage_type,
+    price, storage_warning_upper, storage_warning_down, weight, default_supplier_id, 
+    create_time, update_time, is_delete
+    from mw_product
+  </select>
+
+<!--  List<Product> selectProductByCons(@Param("code")Integer code, @Param("name")String name,-->
+<!--  @Param("type")Integer type, @Param("tel")String tel);-->
+  <resultMap id="ProductVoMap" type="ProductVo">
+    <id column="id" property="id"></id>
+    <result column="pcode" property="productCode"></result>
+    <result column="pname" property="productName"></result>
+    <result column="firm_code" property="firmCode"></result>
+    <result column="inner_code" property="innerCode"></result>
+    <result column="ptname" property="productTypeName"></result>
+    <result column="unitname" property="unitName"></result>
+    <result column="packageTypeName" property="packageTypeName"></result>
+    <result column="storage_warning_upper" property="storageWarningUpper"></result>
+    <result column="storage_warning_down" property="storageWarningDown"></result>
+<!--    <result column="pakage_type" property="packageType"></result>-->
+    <result column="packageTypeName" property="packageTypeName"></result>
+    <result column="price" property="price"></result>
+    <result column="weight" property="weight"></result>
+    <result column="unitId" property="unitId"></result>
+    <result column="supplierName" property="supplierName"></result>
+    <result column="type_id" property="typeId"></result>
+  </resultMap>
+
+<!--  //    private String productCode;-->
+<!--  //    private String productName;-->
+<!--  //    private String firmCode;-->
+<!--  //    private String innerCode;-->
+<!--  //    private String productTypeName;-->
+<!--  //    private String unitName;-->
+<!--  //    private String packageTypeName;-->
+<!--  //    private int storageWarningUpper;-->
+<!--  //    private int storageWarningDown;-->
+<!--  //    private int packageType;-->
+<!--  //    private BigDecimal price;-->
+<!--  //    private BigDecimal weight;-->
+<!--  //    private String supplierName;-->
+
+
+  <select id="selectProductByCons" resultMap="ProductVoMap">
+    select p.id,p.code pcode,p.name pname,u.id unitId,p.firm_code ,p.inner_code,pt.name ptname,u.name unitname,uu.name packageTypeName,
+           p.storage_warning_upper,p.storage_warning_down,p.pakage_type,p.price,p.weight,
+           sp.name supplierName
+        from mw_product p
+            left join mw_supplier s on p.default_supplier_id=s.id
+            left join mw_product_type pt on p.type_id=pt.id
+            left join mw_units u on p.store_unit_id=u.id
+            left join mw_supplier sp on p.default_supplier_id=sp.id
+            left join mw_units uu on p.pakage_type=uu.id
+<where>
+  <if test="code != null and code !=''">
+    and p.code like '%${code}%'
+  </if>
+<if test="name != null and name !=''">
+  and p.name like '%${name}%'
+</if>
+<if test="type != null and type !=''">
+  and p.type_id=#{type}
+</if>
+<if test="tel != null and tel !=''">
+  and s.tel=#{tel}
+</if>
+</where>
+
+  </select>
+<!--  and s.type=#{type}-->
+<!--  List<ProductVo> selectByIds(@Param("ids") List<Integer> ids);-->
+  <select id="selectByIds" resultMap="ProductVoMap">
+    select p.id,p.code pcode,p.name pname,u.id unitId,p.firm_code ,p.inner_code,pt.name ptname,u.name unitname,uu.name packageTypeName,
+    p.storage_warning_upper,p.storage_warning_down,p.pakage_type,p.price,p.weight,
+    sp.name supplierName
+    from mw_product p
+    left join mw_supplier s on p.default_supplier_id=s.id
+    left join mw_product_type pt on p.type_id=pt.id
+    left join mw_units u on p.store_unit_id=u.id
+    left join mw_supplier sp on p.default_supplier_id=sp.id
+    left join mw_units uu on p.pakage_type=uu.id
+    <where>
+        p.id in
+    <foreach collection="ids" open="(" separator="," close=")" item="id">
+      #{id}
+    </foreach>
+    </where>
+
+  </select>
+
+
+
+
+</mapper>

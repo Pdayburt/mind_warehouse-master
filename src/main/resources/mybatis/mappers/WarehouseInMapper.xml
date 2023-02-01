@@ -1,0 +1,115 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.mind.mind_warehouse.mapper.WarehouseInMapper">
+    <!--  <resultMap id="BaseResultMap" type="com.mind.mind_warehouse.entity.WarehouseIn">-->
+    <!--    <id column="id" jdbcType="INTEGER" property="id" />-->
+    <!--    <result column="type" jdbcType="INTEGER" property="type" />-->
+    <!--    <result column="order_num" jdbcType="VARCHAR" property="orderNum" />-->
+    <!--    <result column="supplier_code" jdbcType="VARCHAR" property="supplierCode" />-->
+    <!--    <result column="creat_time" jdbcType="TIMESTAMP" property="creatTime" />-->
+    <!--    <result column="update_time" jdbcType="TIMESTAMP" property="updateTime" />-->
+    <!--    <result column="is_delete" jdbcType="INTEGER" property="isDelete" />-->
+    <!--  </resultMap>-->
+
+    <resultMap id="inMap" type="WarehouseInVo" autoMapping="true">
+        <id column="id" property="id"></id>
+    </resultMap>
+    <delete id="deleteByPrimaryKey" parameterType="java.lang.Integer">
+        delete from mw_warehouse_in
+        where id = #{id,jdbcType=INTEGER}
+    </delete>
+    <delete id="deleteWareIn">
+        delete from mw_warehouse_in_out_sub where in_out_id = #{id,jdbcTypeName=INTEGER}
+    </delete>
+    <delete id="deleteWareByIn">
+        delete from mw_warehouse_in_out where id = #{id}
+    </delete>
+    <delete id="deleteBatchByKeys">
+        delete from  mw_warehouse_in  where id in
+        <foreach collection="array" item="id" open="(" close=")" separator=",">
+            #{id}
+        </foreach>
+    </delete>
+    <delete id="deleteBatchWareIn">
+        delete from  mw_warehouse_in_out_sub where in_out_id in
+        <foreach collection="array" item="id" open="(" close=")" separator=",">
+            #{id}
+        </foreach>
+    </delete>
+
+    <insert id="insert" parameterType="WarehouseInVo" useGeneratedKeys="true" keyProperty="id" keyColumn="id">
+        insert into mw_warehouse_in (type, order_num,
+                                     supplier_id, creat_time, update_time,
+                                     is_delete)
+        values (#{type,jdbcType=INTEGER}, #{orderNum,jdbcType=VARCHAR},
+                #{supplierId,jdbcType=VARCHAR}, #{creatTime,jdbcType=TIMESTAMP}, #{updateTime,jdbcType=TIMESTAMP},
+                0)
+    </insert>
+    <insert id="insertProduct">
+        insert into mw_warehouse_in_out_sub (in_out_id, product_id,
+                                             change_num,storage_id,batch,
+                                             is_delete)
+        values (#{inOutId,jdbcType=INTEGER}, #{productId,jdbcType=INTEGER},
+                #{changeNum,jdbcType=INTEGER},#{storageId,jdbcType=INTEGER},#{batch,jdbcType=VARCHAR},
+                0)
+    </insert>
+    <insert id="insertWareIn">
+        insert into mw_warehouse_in_out (change_id, form_emp_id,
+                                         audit_emp_id, audit_time, status,related_order_num,note, create_time,update_time,is_delete)
+        values (#{changeId,jdbcType=INTEGER}, #{formEmpId,jdbcType=INTEGER},
+                #{auditEmpId,jdbcType=INTEGER}, #{auditTime,jdbcType=TIMESTAMP}, #{status,jdbcType=INTEGER},#{relatedOrderNum,jdbcType=VARCHAR},
+                #{note,jdbcType=VARCHAR},#{createTime,jdbcType=TIMESTAMP},#{updateTime,jdbcType=TIMESTAMP},0)
+    </insert>
+    <update id="updateByPrimaryKey" parameterType="WarehouseInVo">
+        update mw_warehouse_in
+        set type = #{type,jdbcType=INTEGER},
+            order_num = #{orderNum,jdbcType=VARCHAR},
+            supplier_code = #{supplierCode,jdbcType=VARCHAR},
+            update_time = #{updateTime,jdbcType=TIMESTAMP},
+            is_delete = 0
+        where id = #{id,jdbcType=INTEGER}
+    </update>
+    <select id="selectByPrimaryKey" parameterType="java.lang.Integer" resultMap="inMap">
+        select id,type, order_num, supplier_id, creat_time, update_time, is_delete
+        from mw_warehouse_in
+        where id = #{id,jdbcType=INTEGER}
+    </select>
+    <select id="selectAll" resultMap="inMap">
+        select id, in_out_id, type, order_num, supplier_code, creat_time, update_time, is_delete
+        from mw_warehouse_in
+    </select>
+    <!--  vo类-->
+    <select id="selectWarehouseInByCons" resultMap="inMap">
+        select inh.*,ios.*,io.*,st.*,inh.order_num,inh.type,p.name pname,p.code pcode,p.standards,ios.batch iosbatch,ios.change_num change_num,st.name stname,inh.type,ms.name mname,e.name ename,io.status status,em.name aname,io.audit_time  from mw_warehouse_in inh
+        left JOIN mw_warehouse_in_out_sub ios on ios.in_out_id = inh.id
+        LEFT JOIN mw_warehouse_in_out io on io.change_id = inh.order_num
+        left join mw_product p
+        on p.id = ios.product_id
+        LEFT JOIN mw_units u on u.id = p.store_unit_id
+        left join mw_product_stock ps on ps.product_id = p.id
+        left JOIN mw_supplier ms on ms.id = inh.supplier_id
+        left JOIN mw_storage st on st.id = ios.storage_id
+        left JOIN mw_employee e on io.form_emp_id = e.id
+        left JOIN mw_employee em on io.audit_emp_id = em.id
+        <where>
+            and inh.is_delete = 0
+            <if test="orderNum !=null and orderNum.toString().trim() !='' ">
+                and inh.order_num = #{orderNum}
+            </if>
+            <if test="type !=null and type.toString().trim() !='' ">
+                and inh.type = #{type}
+            </if>
+            <if test="status !=null and status.toString().trim() !='' ">
+                and io.status = #{status}
+            </if>
+        </where>
+    </select>
+    <select id="selectProductByKey" parameterType="int" resultType="Integer">
+        select st.id sid
+        from mw_warehouse_in_out_sub s
+                 inner join mw_product_stock st
+                            on s.product_id = st.product_id
+        where s.id = #{id}
+    </select>
+    <select id="selectIdByOrder" resultType="java.lang.Integer"></select>
+</mapper>

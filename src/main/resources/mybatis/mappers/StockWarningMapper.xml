@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.mind.mind_warehouse.mapper.StockWarningMapper">
+
+
+    <resultMap id="StockWarnMap" type="StockWarningVo" autoMapping="true">
+        <id column="id" property="id"></id>
+    </resultMap>
+    <select id="selectProductStockWarnByCons" resultMap="StockWarnMap">
+        select ps.*,mw.*,pr.code prcode,pr.name prname,u.name uname,mw.name mwname,stockupper,stockdown,src.totalcount totalcount from (select ios.product_id,15*CEILING(1.3*ABS(SUM(CASE WHEN 0 > ios.change_num THEN ios.change_num ELSE 0 END)/15)) stockupper,7*CEILING(1.05*ABS(SUM(CASE WHEN 0 > ios.change_num THEN ios.change_num ELSE 0 END)/15)) stockdown from mw_warehouse_in_out_sub  ios where TO_DAYS(NOW()) - TO_DAYS(create_time) &lt;= 15 GROUP BY ios.product_id )as ccs
+        left JOIN mw_product pr on pr.id = ccs.product_id
+        left JOIN mw_product_stock ps on ps.product_id = ccs.product_id
+        left JOIN mw_warehouse mw on mw.id = ps.warehouse_id
+        left JOIN mw_units u on u.id = pr.store_unit_id
+        left JOIN
+        (select pdu.id,pdu.code,
+        pdu.name pduname,
+        pdu.standards ,
+        pto.name ptoname,
+        mu.name muname,
+        mw.name mwname,
+        sge.name sgename,
+        sr.poscount ,
+        sr.negcount ,
+        sr.negcount+sr.poscount as totalcount from (select st.product_id,SUM(st.negdama) as negcount,SUM(st.posdama) as poscount from
+        (select da.product_id,SUM(CASE WHEN 0 > da.product_num THEN da.product_num ELSE 0 END) as negdama,SUM(CASE WHEN 0 &lt; da.product_num THEN da.product_num ELSE 0 END) as posdama from mw_warehouse_damage da inner JOIN mw_product p on da.product_id = p.id GROUP BY da.product_id
+        UNION ALL
+        select inv.product_id,SUM(CASE WHEN 0 > inv.product_num THEN inv.product_num ELSE 0 END) as neginv,SUM(CASE WHEN 0 &lt; inv.product_num THEN inv.product_num ELSE 0 END) as posinv  from mw_warehouse_inventory inv inner join mw_product p on inv.product_id = p.id
+        GROUP BY inv.product_id
+        UNION ALL
+        select ios.product_id,SUM(CASE WHEN 0 > ios.change_num THEN ios.change_num ELSE 0 END) as negios,SUM(CASE WHEN 0 &lt; ios.change_num THEN ios.change_num ELSE 0 END) as posios from mw_warehouse_in_out_sub ios inner JOIN mw_product p
+        on ios.product_id = p.id GROUP BY ios.product_id) as st GROUP BY st.product_id ) sr
+        left JOIN mw_product pdu on pdu.id = sr.product_id left JOIN
+        mw_product_stock po on po.product_id = sr.product_id
+        left JOIN mw_warehouse mw on mw.id = po.warehouse_id
+        left JOIN mw_storage sge on sge.id = po.storage_id
+        left JOIN mw_units mu on
+        mu.id = pdu.store_unit_id
+        left JOIN mw_product_type pto on pto.id = pdu.type_id) src on src.id = pr.id
+        <where>
+            <if test="prCode !=null and prCode.toString().trim() !='' ">
+                and pr.code = #{prCode}
+            </if>
+            <if test="prName !=null and prName.toString().trim() !='' ">
+                and pr.name = #{prName}
+            </if>
+            <if test="id !=null and id !=0">
+                and mw.id = #{id}
+            </if>
+        </where>
+    </select>
+</mapper>

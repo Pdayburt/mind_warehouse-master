@@ -1,0 +1,97 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.mind.mind_warehouse.mapper.PermissionMapper">
+  <resultMap id="BaseResultMap" type="com.mind.mind_warehouse.entity.Permission">
+    <id column="id" jdbcType="INTEGER" property="id" />
+    <result column="code" jdbcType="VARCHAR" property="code" />
+    <result column="name" jdbcType="VARCHAR" property="name" />
+    <result column="url" jdbcType="VARCHAR" property="url" />
+    <result column="url_type" jdbcType="INTEGER" property="urlType" />
+    <result column="create_time" jdbcType="TIMESTAMP" property="createTime" />
+    <result column="update_time" jdbcType="TIMESTAMP" property="updateTime" />
+    <result column="is_delete" jdbcType="INTEGER" property="isDelete" />
+    <result column="parent_id" jdbcType="INTEGER" property="parentId" />
+  </resultMap>
+  <delete id="deleteByPrimaryKey" parameterType="java.lang.Integer">
+    delete from mw_permission
+    where id = #{id,jdbcType=INTEGER}
+  </delete>
+  <insert id="insert" parameterType="com.mind.mind_warehouse.entity.Permission">
+    insert into mw_permission (id, code, name, 
+      url, url_type, create_time, 
+      update_time, is_delete, parent_id
+      )
+    values (#{id,jdbcType=INTEGER}, #{code,jdbcType=VARCHAR}, #{name,jdbcType=VARCHAR}, 
+      #{url,jdbcType=VARCHAR}, #{urlType,jdbcType=INTEGER}, #{createTime,jdbcType=TIMESTAMP}, 
+      #{updateTime,jdbcType=TIMESTAMP}, #{isDelete,jdbcType=INTEGER}, #{parentId,jdbcType=INTEGER}
+      )
+  </insert>
+  <update id="updateByPrimaryKey" parameterType="com.mind.mind_warehouse.entity.Permission">
+    update mw_permission
+    set code = #{code,jdbcType=VARCHAR},
+      name = #{name,jdbcType=VARCHAR},
+      url = #{url,jdbcType=VARCHAR},
+      url_type = #{urlType,jdbcType=INTEGER},
+      create_time = #{createTime,jdbcType=TIMESTAMP},
+      update_time = #{updateTime,jdbcType=TIMESTAMP},
+      is_delete = #{isDelete,jdbcType=INTEGER},
+      parent_id = #{parentId,jdbcType=INTEGER}
+    where id = #{id,jdbcType=INTEGER}
+  </update>
+  <select id="selectByPrimaryKey" parameterType="java.lang.Integer" resultMap="BaseResultMap">
+    select id, code, name, url, url_type, create_time, update_time, is_delete, parent_id
+    from mw_permission
+    where id = #{id,jdbcType=INTEGER}
+  </select>
+  <select id="selectAll" resultMap="BaseResultMap">
+    select id, code, name, url, url_type, create_time, update_time, is_delete, parent_id
+    from mw_permission
+  </select>
+
+<!--  List<MenuVo> selectAllMenu();-->
+  <resultMap id="MenuVoMap" type="MenuVo">
+    <id column="pid" property="id"></id>
+    <result column="pname" property="name"></result>
+    <collection property="children" ofType="MenuVo">
+      <id column="cid" property="id"></id>
+      <result column="cname" property="name"></result>
+      <result column="purl" property="url"></result>
+    </collection>
+  </resultMap>
+  <select id="selectAllMenu" resultMap="MenuVoMap">
+    SELECT p1.id pid ,p1.`name` pname,p2.id cid,p2.`name` cname ,p2.url purl
+    FROM mw_permission p1 LEFT JOIN mw_permission p2 ON p1.id=p2.parent_id
+    WHERE p1.parent_id=-1
+  </select>
+<!--  int insertRoleIDsByEmpId(@Param("empId")Integer empId,@Param("roleIds")List<Integer> roleIds);-->
+  <insert id="insertRoleIDsByEmpId">
+    insert into mw_emp_role(emp_id,role_id)values
+    <foreach collection="roleIds" separator="," item="roleId">
+      (#{empId},#{roleId})
+    </foreach>
+  </insert>
+<!--  List<Permission> selectPermissionByName(String name);-->
+  <select id="selectPermissionByName" resultType="Permission">
+    select * from mw_permission
+<where>
+  <if test="name != null and name != ''">
+    and name like '%${name}%'
+  </if>
+</where>
+  </select>
+<!--  List<MenuVo> selectMenuByName(@Param("name") String name);-->
+<select id="selectMenuByName" resultMap="MenuVoMap">
+  SELECT DISTINCT	pp.*
+  FROM mw_employee ee INNER JOIN mw_emp_role er ON ee.id=er.emp_id
+                      INNER JOIN mw_role rr ON er.role_id=rr.id
+                      INNER JOIN mw_role_permission rp ON rr.id=rp.role_id
+                      INNER JOIN(
+    SELECT p1.id pid ,p1.`name` pname,p2.id cid,p2.`name` cname ,p2.url purl
+    FROM mw_permission p1 LEFT JOIN mw_permission p2 ON p1.id=p2.parent_id
+    WHERE p1.parent_id=-1
+  )pp ON rp.permission_id=pp.cid
+  WHERE account =#{name}
+</select>
+
+
+</mapper>

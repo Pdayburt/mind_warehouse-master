@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.mind.mind_warehouse.mapper.WarehouseAndStorageMapper">
+
+    <resultMap id="WarehouseAndStorageVoMap" type="ShowWarehouseAndStorageVo" autoMapping="true">
+        <id column="id" property="id"></id>
+    </resultMap>
+
+    <select id="selectWarehouseAndStorage" resultMap="WarehouseAndStorageVoMap">
+        SELECT oo.id, oo.old_warehouse_name, oo.new_warehouse_name, ssss.old_storage_name, ssss.new_storage_name
+        FROM (SELECT o.id, o.old_warehouse_name, w.name as new_warehouse_name
+              FROM
+                (SELECT wm.id, wm.new_warehouse_id, w.name as old_warehouse_name
+                    FROM mw_warehouse_move wm
+                    LEFT JOIN mw_warehouse w
+                    on wm.old_warehouse_id = w.id) as o
+                    LEFT JOIN mw_warehouse w
+                    on o.new_warehouse_id = w.id) as oo
+                    INNER JOIN
+                (SELECT ss.id, ss.old_storage_name, s.name as new_storage_name
+              FROM (SELECT wm.id, wm.new_storage_id, s.name as old_storage_name
+                    FROM mw_warehouse_move wm
+                    LEFT JOIN mw_storage s
+                    on wm.old_storage_id = s.id) ss
+                    LEFT JOIN mw_storage s
+                    on ss.new_storage_id = s.id) as ssss
+             on oo.id = ssss.id
+            where oo.id = #{id}
+
+    </select>
+
+
+</mapper>

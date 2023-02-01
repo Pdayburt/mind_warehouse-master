@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.mind.mind_warehouse.mapper.SalesReturnManagementMapper">
+  <resultMap id="BaseResultMap" type="com.mind.mind_warehouse.entity.SalesReturnManagement">
+    <id column="id" jdbcType="INTEGER" property="id" />
+    <result column="return_order_number" jdbcType="VARCHAR" property="returnOrderNumber" />
+    <result column="product_id" jdbcType="INTEGER" property="productId" />
+    <result column="product_code" jdbcType="INTEGER" property="productCode" />
+    <result column="product_standard" jdbcType="VARCHAR" property="productStandard" />
+    <result column="units_id" jdbcType="INTEGER" property="unitsId" />
+    <result column="unit_price" jdbcType="DECIMAL" property="unitPrice" />
+    <result column="return_number" jdbcType="INTEGER" property="returnNumber" />
+    <result column="total_price" jdbcType="DECIMAL" property="totalPrice" />
+    <result column="sales_order" jdbcType="VARCHAR" property="salesOrder" />
+    <result column="client_name" jdbcType="VARCHAR" property="clientName" />
+    <result column="status" jdbcType="INTEGER" property="status" />
+  </resultMap>
+  <delete id="deleteByPrimaryKey" parameterType="java.lang.Integer">
+    delete from mw_sales_return_management
+    where id = #{id,jdbcType=INTEGER}
+  </delete>
+  <insert id="insert" parameterType="com.mind.mind_warehouse.entity.SalesReturnManagement">
+    insert into mw_sales_return_management (id, return_order_number, product_id, 
+      product_code, product_standard, units_id, 
+      unit_price, return_number, total_price, 
+      sales_order, client_name, status
+      )
+    values (#{id,jdbcType=INTEGER}, #{returnOrderNumber,jdbcType=VARCHAR}, #{productId,jdbcType=INTEGER}, 
+      #{productCode,jdbcType=INTEGER}, #{productStandard,jdbcType=VARCHAR}, #{unitsId,jdbcType=INTEGER}, 
+      #{unitPrice,jdbcType=DECIMAL}, #{returnNumber,jdbcType=INTEGER}, #{totalPrice,jdbcType=DECIMAL}, 
+      #{salesOrder,jdbcType=VARCHAR}, #{clientName,jdbcType=VARCHAR}, #{status,jdbcType=INTEGER}
+      )
+  </insert>
+  <update id="updateByPrimaryKey" parameterType="com.mind.mind_warehouse.entity.SalesReturnManagement">
+    update mw_sales_return_management
+    set return_order_number = #{returnOrderNumber,jdbcType=VARCHAR},
+      product_id = #{productId,jdbcType=INTEGER},
+      product_code = #{productCode,jdbcType=INTEGER},
+      product_standard = #{productStandard,jdbcType=VARCHAR},
+      units_id = #{unitsId,jdbcType=INTEGER},
+      unit_price = #{unitPrice,jdbcType=DECIMAL},
+      return_number = #{returnNumber,jdbcType=INTEGER},
+      total_price = #{totalPrice,jdbcType=DECIMAL},
+      sales_order = #{salesOrder,jdbcType=VARCHAR},
+      client_name = #{clientName,jdbcType=VARCHAR},
+      status = #{status,jdbcType=INTEGER}
+    where id = #{id,jdbcType=INTEGER}
+  </update>
+  <select id="selectByPrimaryKey" parameterType="java.lang.Integer" resultMap="BaseResultMap">
+    select id, return_order_number, product_id, product_code, product_standard, units_id, 
+    unit_price, return_number, total_price, sales_order, client_name, status
+    from mw_sales_return_management
+    where id = #{id,jdbcType=INTEGER}
+  </select>
+  <select id="selectAll" resultMap="BaseResultMap">
+    select id, return_order_number, product_id, product_code, product_standard, units_id, 
+    unit_price, return_number, total_price, sales_order, client_name, status
+    from mw_sales_return_management
+  </select>
+</mapper>

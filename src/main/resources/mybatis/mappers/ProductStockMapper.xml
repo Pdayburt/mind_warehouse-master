@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.mind.mind_warehouse.mapper.ProductStockMapper">
+    <resultMap id="baseMap" type="ProductStock" autoMapping="true">
+        <id column="id" jdbcType="INTEGER" property="id"/>
+        <result column="product_id" jdbcType="VARCHAR" property="productId" />
+        <result column="stock" jdbcType="INTEGER" property="stock" />
+        <result column="lock_stock" jdbcType="INTEGER" property="lockStock" />
+        <result column="warehouse_id" jdbcType="INTEGER" property="warehouseId" />
+        <result column="storage_id" jdbcType="INTEGER" property="storageId" />
+        <result column="create_time" jdbcType="TIMESTAMP" property="createTime" />
+        <result column="update_time" jdbcType="TIMESTAMP" property="updateTime" />
+        <result column="is_delete" jdbcType="INTEGER" property="isDelete" />
+    </resultMap>
+
+    <select id="selectByPrimaryKey" parameterType="java.lang.Integer" resultMap="baseMap">
+        select *
+        from mw_product_stock
+        where id = #{id,jdbcType=INTEGER}
+    </select>
+
+    <select id="selectByProductId" parameterType="java.lang.Integer" resultMap="baseMap">
+        select *
+        from mw_product_stock
+        where product_id = #{productId}
+    </select>
+
+
+    <update id="updateProductStockById">
+        update mw_product_stock s
+        set warehouse_id = #{warehouseId},
+            storage_id   = #{storageId},
+            update_time  = #{updateTime}
+        where s.id = #{id}
+    </update>
+
+    <update id="updateStorageIdByPid">
+        update mw_product_stock ps
+        set
+            storage_id   = #{newStorageId},
+            update_time  = #{updateTime}
+        where ps.product_id = #{pid}
+    </update>
+
+
+    <update id="updateProductStock" parameterType="ProductStockVo">
+        update mw_product_stock ps
+        set ps.stock = #{stock}
+        where ps.id = #{psid}
+    </update>
+
+    <!--    int update(ProductStockVo productStockVo);-->
+    <update id="update" parameterType="ProductStock">
+        update mw_product_stock
+        <set>
+            <if test="productId != null">
+                product_id = #{productId},
+            </if>
+            <if test="stock != null">
+                stock = #{stock},
+            </if>
+            <if test="lockStock != null">
+                lock_stock = #{lockStock},
+            </if>
+            <if test="warehouseId != null">
+                warehouse_id = #{warehouseId},
+            </if>
+            <if test="storageId != null">
+                storage_id = #{storageId},
+            </if>
+            <if test="updateTime != null">
+                update_time = #{updateTime},
+            </if>
+            <if test="isDelete != null">
+                is_delete = #{isDelete}
+            </if>
+        </set>
+        where id = #{id}
+    </update>
+
+
+</mapper>

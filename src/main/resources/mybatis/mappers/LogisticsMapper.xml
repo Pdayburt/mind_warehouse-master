@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.mind.mind_warehouse.mapper.LogisticsMapper">
+  <resultMap id="BaseResultMap" type="com.mind.mind_warehouse.entity.Logistics">
+    <id column="id" jdbcType="INTEGER" property="id" />
+    <result column="code" jdbcType="VARCHAR" property="code" />
+    <result column="name" jdbcType="VARCHAR" property="name" />
+    <result column="create_time" jdbcType="TIMESTAMP" property="createTime" />
+    <result column="update_time" jdbcType="TIMESTAMP" property="updateTime" />
+    <result column="is_delete" jdbcType="INTEGER" property="isDelete" />
+    <result column="note" jdbcType="VARCHAR" property="note" />
+  </resultMap>
+  <update id="deleteByPrimaryKey" parameterType="java.lang.Integer">
+    update  mw_logistics set is_delete = 1
+    where id = #{id,jdbcType=INTEGER}
+  </update>
+  <update id="deleteBatchKeys">
+    update  mw_logistics  set is_delete = 1 where id in
+    <foreach collection="array" item="id" open="(" close=")" separator=",">
+      #{id}
+    </foreach>
+  </update>
+  <insert id="insert" parameterType="com.mind.mind_warehouse.entity.Logistics">
+    insert into mw_logistics (code, name,
+      create_time, update_time, is_delete, 
+      note)
+    values (#{code,jdbcType=VARCHAR}, #{name,jdbcType=VARCHAR},
+      #{createTime,jdbcType=TIMESTAMP}, #{updateTime,jdbcType=TIMESTAMP},0,
+      #{note,jdbcType=VARCHAR})
+  </insert>
+  <update id="updateByPrimaryKey" parameterType="com.mind.mind_warehouse.entity.Logistics">
+    update mw_logistics
+    set code = #{code,jdbcType=VARCHAR},
+      name = #{name,jdbcType=VARCHAR},
+      update_time = #{updateTime,jdbcType=TIMESTAMP},
+      is_delete = 0,
+      note = #{note,jdbcType=VARCHAR}
+    where id = #{id,jdbcType=INTEGER}
+  </update>
+  <select id="selectByPrimaryKey" parameterType="java.lang.Integer" resultMap="BaseResultMap">
+    select id, code, name, create_time, update_time, is_delete, note
+    from mw_logistics
+    where id = #{id,jdbcType=INTEGER}
+  </select>
+  <select id="selectAll" resultMap="BaseResultMap">
+    select id, code, name, create_time, update_time, is_delete, note
+    from mw_logistics
+  </select>
+    <select id="selectLogByCons" resultType="com.mind.mind_warehouse.entity.Logistics">
+      select id,l.code,l.name,l.note from mw_logistics l
+    <where>
+        and is_delete = 0
+        <if test="code !=null and code.toString().trim() != ''">
+            and l.code = #{code}
+        </if>
+      <if test="id !=null and id != 0 ">
+        and l.id = #{id}
+      </if>
+    </where>
+    </select>
+</mapper>

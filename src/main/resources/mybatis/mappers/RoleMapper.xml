@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.mind.mind_warehouse.mapper.RoleMapper">
+  <resultMap id="BaseResultMap" type="com.mind.mind_warehouse.entity.Role">
+    <id column="id" jdbcType="INTEGER" property="id" />
+    <result column="code" jdbcType="VARCHAR" property="code" />
+    <result column="name" jdbcType="VARCHAR" property="name" />
+    <result column="create_time" jdbcType="TIMESTAMP" property="createTime" />
+    <result column="update_time" jdbcType="TIMESTAMP" property="updateTime" />
+    <result column="is_delete" jdbcType="INTEGER" property="isDelete" />
+  </resultMap>
+  <delete id="deleteByPrimaryKey" parameterType="java.lang.Integer">
+    delete from mw_role
+    where id = #{id,jdbcType=INTEGER}
+  </delete>
+  <insert id="insert" parameterType="com.mind.mind_warehouse.entity.Role">
+    insert into mw_role (id, code, name, 
+      create_time, update_time, is_delete
+      )
+    values (#{id,jdbcType=INTEGER}, #{code,jdbcType=VARCHAR}, #{name,jdbcType=VARCHAR}, 
+      #{createTime,jdbcType=TIMESTAMP}, #{updateTime,jdbcType=TIMESTAMP}, #{isDelete,jdbcType=INTEGER}
+      )
+  </insert>
+  <update id="updateByPrimaryKey" parameterType="com.mind.mind_warehouse.entity.Role">
+    update mw_role
+    set code = #{code,jdbcType=VARCHAR},
+      name = #{name,jdbcType=VARCHAR},
+      create_time = #{createTime,jdbcType=TIMESTAMP},
+      update_time = #{updateTime,jdbcType=TIMESTAMP},
+      is_delete = #{isDelete,jdbcType=INTEGER}
+    where id = #{id,jdbcType=INTEGER}
+  </update>
+  <select id="selectByPrimaryKey" parameterType="java.lang.Integer" resultMap="BaseResultMap">
+    select id, code, name, create_time, update_time, is_delete
+    from mw_role
+    where id = #{id,jdbcType=INTEGER}
+  </select>
+  <select id="selectAll" resultMap="BaseResultMap">
+    select id, code, name, create_time, update_time, is_delete
+    from mw_role
+  </select>
+  <!--  List<Role> selectAllRolesByEmpId(Integer id);-->
+  <select id="selectAllRolesByEmpId" resultType="Role" parameterType="Integer">
+    SELECT r.id,r.name
+    FROM mw_emp_role er INNER JOIN mw_role r ON er.role_id=r.id
+    WHERE er.emp_id=#{value}
+  </select>
+<!--  List<Role> selectAllRolesByName(String name);-->
+<!--  <select id="selectAllRolesByName" resultType="Role" parameterType="String">-->
+<!--    SELECT r.id,r.name-->
+<!--    FROM mw_emp_role er INNER JOIN mw_role r ON er.role_id=r.id-->
+<!--    WHERE er.emp_id=#{value}-->
+<!--  </select>-->
+</mapper>

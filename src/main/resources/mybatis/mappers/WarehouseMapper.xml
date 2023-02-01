@@ -1,0 +1,174 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.mind.mind_warehouse.mapper.WarehouseMapper">
+    <resultMap id="BaseResultMap" type="com.mind.mind_warehouse.entity.Warehouse">
+        <id column="id" jdbcType="INTEGER" property="id"/>
+        <result column="code" jdbcType="VARCHAR" property="code"/>
+        <result column="name" jdbcType="VARCHAR" property="name"/>
+        <result column="type_id" jdbcType="INTEGER" property="typeId"/>
+        <result column="department_id" jdbcType="INTEGER" property="departmentId"/>
+        <result column="area" jdbcType="VARCHAR" property="area"/>
+        <result column="contact" jdbcType="VARCHAR" property="contact"/>
+        <result column="tel" jdbcType="VARCHAR" property="tel"/>
+        <result column="address" jdbcType="VARCHAR" property="address"/>
+        <result column="create_time" jdbcType="TIMESTAMP" property="createTime"/>
+        <result column="update_time" jdbcType="TIMESTAMP" property="updateTime"/>
+        <result column="is_delete" jdbcType="INTEGER" property="isDelete"/>
+        <result column="note" jdbcType="VARCHAR" property="note"/>
+    </resultMap>
+
+    <resultMap id="BaseMap" type="com.mind.mind_warehouse.vo.WarehouseInfoVo">
+        <id column="id" jdbcType="INTEGER" property="id"/>
+        <result column="code" jdbcType="VARCHAR" property="code"/>
+        <result column="name" jdbcType="VARCHAR" property="name"/>
+        <result column="type_id" jdbcType="INTEGER" property="typeId"/>
+        <result column="department_id" jdbcType="INTEGER" property="departmentId"/>
+        <result column="area" jdbcType="VARCHAR" property="area"/>
+        <result column="contact" jdbcType="VARCHAR" property="contact"/>
+        <result column="tel" jdbcType="VARCHAR" property="tel"/>
+        <result column="address" jdbcType="VARCHAR" property="address"/>
+        <result column="create_time" jdbcType="TIMESTAMP" property="createTime"/>
+        <result column="update_time" jdbcType="TIMESTAMP" property="updateTime"/>
+        <result column="is_delete" jdbcType="INTEGER" property="isDelete"/>
+        <result column="note" jdbcType="VARCHAR" property="note"/>
+        <result column="dname" jdbcType="VARCHAR" property="dname"/>
+    </resultMap>
+
+    <resultMap id="warehouseVoMap" type="com.mind.mind_warehouse.vo.WarehouseVo">
+        <id column="id" jdbcType="INTEGER" property="id"/>
+        <result column="name" jdbcType="VARCHAR" property="name"/>
+        <collection property="children" ofType="Storage" autoMapping="true">
+            <id column="sid" property="id"/>
+            <result column="sname" property="name"/>
+        </collection>
+    </resultMap>
+
+    <delete id="deleteByPrimaryKey" parameterType="java.lang.Integer">
+        delete
+        from mw_warehouse
+        where id = #{id,jdbcType=INTEGER}
+    </delete>
+    <insert id="insert" parameterType="com.mind.mind_warehouse.entity.Warehouse">
+        insert into mw_warehouse (code, name,
+                                  type_id, department_id, area,
+                                  contact, tel, address,
+                                  create_time, update_time, is_delete,
+                                  note)
+        values (#{code,jdbcType=VARCHAR}, #{name,jdbcType=VARCHAR},
+                #{typeId,jdbcType=INTEGER}, #{departmentId,jdbcType=INTEGER}, #{area,jdbcType=VARCHAR},
+                #{contact,jdbcType=VARCHAR}, #{tel,jdbcType=VARCHAR}, #{address,jdbcType=VARCHAR},
+                #{createTime,jdbcType=TIMESTAMP}, #{updateTime,jdbcType=TIMESTAMP}, #{isDelete,jdbcType=INTEGER},
+                #{note,jdbcType=VARCHAR})
+    </insert>
+    <update id="updateByPrimaryKey" parameterType="com.mind.mind_warehouse.entity.Warehouse">
+        update mw_warehouse
+        set code          = #{code,jdbcType=VARCHAR},
+            name          = #{name,jdbcType=VARCHAR},
+            type_id       = #{typeId,jdbcType=INTEGER},
+            department_id = #{departmentId,jdbcType=INTEGER},
+            area          = #{area,jdbcType=VARCHAR},
+            contact       = #{contact,jdbcType=VARCHAR},
+            tel           = #{tel,jdbcType=VARCHAR},
+            address       = #{address,jdbcType=VARCHAR},
+            create_time   = #{createTime,jdbcType=TIMESTAMP},
+            update_time   = #{updateTime,jdbcType=TIMESTAMP},
+            is_delete     = #{isDelete,jdbcType=INTEGER},
+            note          = #{note,jdbcType=VARCHAR}
+        where id = #{id,jdbcType=INTEGER}
+    </update>
+    <select id="selectByPrimaryKey" parameterType="java.lang.Integer" resultMap="BaseResultMap">
+        select id,
+               code,
+               name,
+               type_id,
+               department_id,
+               area,
+               contact,
+               tel,
+               address,
+               create_time,
+               update_time,
+               is_delete,
+               note
+        from mw_warehouse
+        where id = #{id,jdbcType=INTEGER}
+    </select>
+    <select id="selectAll" resultMap="BaseResultMap">
+        select id,
+               code,
+               name,
+               type_id,
+               department_id,
+               area,
+               contact,
+               tel,
+               address,
+               create_time,
+               update_time,
+               is_delete,
+               note
+        from mw_warehouse
+        where is_delete = 0
+    </select>
+
+    <!-- selectOnPageByCondition -->
+    <select id="selectOnPageByCondition" resultMap="BaseMap">
+        select w.id,
+        w.code,
+        w.name,
+        w.type_id,
+        w.department_id,
+        w.area,
+        w.contact,
+        w.tel,
+        w.address,
+        w.create_time,
+        w.update_time,
+        w.is_delete,
+        w.note,
+        d.name as dname
+        from mw_warehouse w
+        left join mw_department d
+        on w.department_id = d.id
+
+        <where>
+            w.is_delete = 0
+            <if test="code != null and code.toString().trim() !=''">
+                and w.code like '%${code}%'
+            </if>
+            <if test="name != null and name.toString().trim() !=''">
+                and w.`name` like '%${name}%'
+            </if>
+            <if test="departmentId != null and departmentId != 0">
+                and w.department_id = #{departmentId}
+            </if>
+            <if test="type != null and type != 0">
+                and w.`type` = #{type}
+            </if>
+        </where>
+    </select>
+
+    <!--    List<WarehouseVo> selectAllWarehouseAndStroage();-->
+    <select id="selectAllWarehouseAndStroage" resultMap="warehouseVoMap">
+        select w.id, w.name, s.id as sid, s.name as sname, s.warehouse_id, s.type_id, s.code
+        from mw_warehouse w
+                 left join mw_storage s
+                           on w.id = s.warehouse_id
+        WHERE w.is_delete = 0
+          and s.is_delete = 0
+          and s.is_ban = 0
+    </select>
+
+    <!--    List<Warehouse> selectByIds(@Param("ids")int[] ids);-->
+    <select id="selectByIds" resultMap="BaseMap">
+        select w.*,d.name as dname
+        from mw_warehouse w
+        left join mw_department d
+        on w.department_id = d.id
+        <where>
+            <foreach collection="ids" separator="," open="w.id in(" close=")" item="id">
+                #{id}
+            </foreach>
+        </where>
+    </select>
+</mapper>

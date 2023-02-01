@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.mind.mind_warehouse.mapper.WarehouseInOutSaleMapper">
+  <resultMap id="BaseResultMap" type="com.mind.mind_warehouse.entity.WarehouseInOutSale">
+    <id column="id" jdbcType="INTEGER" property="id" />
+    <result column="warehouse" jdbcType="VARCHAR" property="warehouse" />
+    <result column="related_num" jdbcType="INTEGER" property="relatedNum" />
+    <result column="type" jdbcType="INTEGER" property="type" />
+  </resultMap>
+  <delete id="deleteByPrimaryKey" parameterType="java.lang.Integer">
+    delete from mw_warehouse_in_out_sale
+    where id = #{id,jdbcType=INTEGER}
+  </delete>
+  <insert id="insert" parameterType="com.mind.mind_warehouse.entity.WarehouseInOutSale">
+    insert into mw_warehouse_in_out_sale (id, warehouse, related_num, 
+      type)
+    values (#{id,jdbcType=INTEGER}, #{warehouse,jdbcType=VARCHAR}, #{relatedNum,jdbcType=INTEGER}, 
+      #{type,jdbcType=INTEGER})
+  </insert>
+  <update id="updateByPrimaryKey" parameterType="com.mind.mind_warehouse.entity.WarehouseInOutSale">
+    update mw_warehouse_in_out_sale
+    set warehouse = #{warehouse,jdbcType=VARCHAR},
+      related_num = #{relatedNum,jdbcType=INTEGER},
+      type = #{type,jdbcType=INTEGER}
+    where id = #{id,jdbcType=INTEGER}
+  </update>
+  <select id="selectByPrimaryKey" parameterType="java.lang.Integer" resultMap="BaseResultMap">
+    select id, warehouse, related_num, type
+    from mw_warehouse_in_out_sale
+    where id = #{id,jdbcType=INTEGER}
+  </select>
+  <select id="selectAll" resultMap="BaseResultMap">
+    select id, warehouse, related_num, type
+    from mw_warehouse_in_out_sale
+  </select>
+</mapper>

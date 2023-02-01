@@ -1,0 +1,129 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.mind.mind_warehouse.mapper.WarehouseInventoryMapper">
+  <resultMap id="BaseResultMap" type="com.mind.mind_warehouse.entity.WarehouseInventory">
+    <id column="id" jdbcType="INTEGER" property="id" />
+    <result column="inventory_num" jdbcType="VARCHAR" property="inventoryNum" />
+    <result column="create_by_emp" jdbcType="VARCHAR" property="createByEmp" />
+    <result column="product_id" jdbcType="INTEGER" property="productId" />
+    <result column="product_num" jdbcType="INTEGER" property="productNum" />
+    <result column="batch" jdbcType="VARCHAR" property="batch" />
+    <result column="unit" jdbcType="INTEGER" property="unit" />
+    <result column="storage_id" jdbcType="INTEGER" property="storageId" />
+    <result column="audit_emp_id" jdbcType="INTEGER" property="auditEmpId" />
+    <result column="audit_time" jdbcType="TIMESTAMP" property="auditTime" />
+    <result column="status" jdbcType="INTEGER" property="status" />
+    <result column="is_delete" jdbcType="INTEGER" property="isDelete" />
+    <result column="create_time" jdbcType="TIMESTAMP" property="createTime" />
+    <result column="update_time" jdbcType="TIMESTAMP" property="updateTime" />
+  </resultMap>
+  <delete id="deleteByPrimaryKey" parameterType="java.lang.Integer">
+    delete from mw_warehouse_inventory
+    where id = #{id,jdbcType=INTEGER}
+  </delete>
+  <insert id="insert" parameterType="com.mind.mind_warehouse.entity.WarehouseInventory" useGeneratedKeys="true" keyProperty="id">
+    insert into mw_warehouse_inventory (id, inventory_num, create_by_emp, 
+      product_id, product_num, batch, 
+      unit, storage_id, audit_emp_id, 
+      audit_time, status, is_delete, 
+      create_time, update_time)
+    values (#{id,jdbcType=INTEGER}, #{inventoryNum,jdbcType=VARCHAR}, #{createByEmp,jdbcType=VARCHAR},
+      #{productId,jdbcType=INTEGER}, #{productNum,jdbcType=INTEGER}, #{batch,jdbcType=VARCHAR},
+      #{unit,jdbcType=INTEGER}, #{storageId,jdbcType=INTEGER}, #{auditEmpId,jdbcType=INTEGER}, 
+      #{auditTime,jdbcType=TIMESTAMP}, #{status,jdbcType=INTEGER}, #{isDelete,jdbcType=INTEGER}, 
+      #{createTime,jdbcType=TIMESTAMP}, #{updateTime,jdbcType=TIMESTAMP})
+  </insert>
+  <update id="updateByPrimaryKey" parameterType="com.mind.mind_warehouse.entity.WarehouseInventory">
+    update mw_warehouse_inventory
+    set inventory_num = #{inventoryNum,jdbcType=VARCHAR},
+      create_by_emp = #{createByEmp,jdbcType=VARCHAR},
+      product_id = #{productId,jdbcType=INTEGER},
+      product_num = #{productNum,jdbcType=INTEGER},
+      batch = #{batch,jdbcType=VARCHAR},
+      unit = #{unit,jdbcType=INTEGER},
+      storage_id = #{storageId,jdbcType=INTEGER},
+      audit_emp_id = #{auditEmpId,jdbcType=INTEGER},
+      audit_time = #{auditTime,jdbcType=TIMESTAMP},
+      status = #{status,jdbcType=INTEGER},
+      is_delete = #{isDelete,jdbcType=INTEGER},
+      create_time = #{createTime,jdbcType=TIMESTAMP},
+      update_time = #{updateTime,jdbcType=TIMESTAMP}
+    where id = #{id,jdbcType=INTEGER}
+  </update>
+  <select id="selectByPrimaryKey" parameterType="java.lang.Integer" resultMap="BaseResultMap">
+    select id, inventory_num, create_by_emp, product_id, product_num, batch, unit, storage_id, 
+    audit_emp_id, audit_time, status, is_delete, create_time, update_time
+    from mw_warehouse_inventory
+    where id = #{id,jdbcType=INTEGER}
+  </select>
+  <select id="selectAll" resultMap="BaseResultMap">
+    select id, inventory_num, create_by_emp, product_id, product_num, batch, unit, storage_id, 
+    audit_emp_id, audit_time, status, is_delete, create_time, update_time
+    from mw_warehouse_inventory
+  </select>
+
+  <!--int insertInventoryAndProducts(@Param("id") Integer id,@Param("ids") List<Integer> checkedIds);-->
+  <insert id="insertInventoryAndProducts">
+    insert into mw_warehouse_inventory_product (inventory_id,product_id) values
+    <foreach collection="ids" item="pid" separator=",">
+      (#{id},#{pid})
+    </foreach>
+  </insert>
+  <!--int insertInventoryAndProductAndCount(@Param("id") Integer id, @Param("mapList")List<Map> mapList);-->
+  <insert id="insertInventoryAndProductAndCount">
+    insert into mw_warehouse_inventory_product (inventory_id,product_id,inventory_count) values
+    <foreach collection="mapList" item="map" separator=",">
+      (#{id},#{map.productId},#{map.account})
+    </foreach>
+  </insert>
+
+  <!--int deleteById(Integer id);-->
+  <update id="deleteById" parameterType="Integer">
+    update mw_warehouse_inventory
+    set is_delete = 1
+    where id = #{id,jdbcType=INTEGER}
+  </update>
+
+ <!--List<WarehouseInventory> selectByLike(@Param("code") String inventoryNum,@Param("status") Integer status);-->
+  <select id="selectByLike" resultMap="BaseResultMap">
+    select id, inventory_num, create_by_emp, product_id, product_num, batch, unit, storage_id,
+           audit_emp_id, audit_time, status, is_delete, create_time, update_time
+    from mw_warehouse_inventory
+    <where>
+      is_delete=0
+      <if test="code != null and code.toString().trim() != ''">
+        and inventory_num like concat ('%',#{code},'%')
+      </if>
+      <if test="status != null">
+        and status like concat('%',#{status},'%')
+      </if>
+    </where>
+  </select>
+
+
+  <!--List<InventoryPlusVo> selectInventoryPlusById(Integer id);-->
+  <resultMap id="InventoryPlusMap" type="InventoryPlusVo">
+    <id column="invenId" property="inventoryId"></id>
+    <result column="batch" property="batch"></result>
+    <result column="pid" property="productId"></result>
+    <result column="code" property="productCode"></result>
+    <result column="name" property="productName"></result>
+    <result column="uname" property="unitName"></result>
+    <result column="inventory_count" property="inventoryCount"></result>
+    <result column="stock" property="stock"></result>
+    <result column="stgId" property="storageId"></result>
+    <result column="stgname" property="storageName"></result>
+  </resultMap>
+
+  <select id="selectInventoryPlusById" parameterType="Integer" resultMap="InventoryPlusMap">
+    select i.id as invenId,i.batch,ip.product_id as pid,p.`code`,p.`name`,u.`name` as uname,ip.inventory_count,s.stock,stg.id as stgId,stg.`name` as stgname
+    from mw_warehouse_inventory i
+           INNER JOIN mw_warehouse_inventory_product ip on i.id=ip.inventory_id
+           INNER JOIN mw_product p on ip.product_id=p.id
+           LEFT JOIN mw_units u on p.store_unit_id=u.id
+           LEFT JOIN mw_product_stock s on p.id=s.product_id
+           LEFT JOIN mw_storage stg on s.storage_id=stg.id
+    WHERE i.id=#{id} and ip.is_deleate=0
+  </select>
+
+</mapper>

@@ -1,0 +1,164 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.mind.mind_warehouse.mapper.WarehousePurchaseReturnMapper">
+  <resultMap id="BaseResultMap" type="com.mind.mind_warehouse.entity.WarehousePurchaseReturn">
+    <id column="id" jdbcType="INTEGER" property="id" />
+    <result column="num" jdbcType="INTEGER" property="num" />
+    <result column="type" jdbcType="INTEGER" property="type" />
+    <result column="supplier_id" jdbcType="INTEGER" property="supplierId" />
+    <result column="contact_person" jdbcType="VARCHAR" property="contactPerson" />
+    <result column="tel" jdbcType="VARCHAR" property="tel" />
+    <result column="receive_goods_time" jdbcType="TIMESTAMP" property="receiveGoodsTime" />
+    <result column="create_by_emp" jdbcType="INTEGER" property="createByEmp" />
+    <result column="product_id" jdbcType="INTEGER" property="productId" />
+    <result column="count" jdbcType="INTEGER" property="count" />
+    <result column="product_total_price" jdbcType="DECIMAL" property="productTotalPrice" />
+    <result column="return_num" jdbcType="VARCHAR" property="returnNum" />
+    <result column="enter_fund_status" jdbcType="INTEGER" property="enterFundStatus" />
+    <result column="status" jdbcType="INTEGER" property="status" />
+    <result column="is_delete" jdbcType="INTEGER" property="isDelete" />
+    <result column="create_time" jdbcType="TIMESTAMP" property="createTime" />
+    <result column="update_time" jdbcType="TIMESTAMP" property="updateTime" />
+  </resultMap>
+  <delete id="deleteByPrimaryKey" parameterType="java.lang.Integer">
+    delete from mw_warehouse_purchase_return
+    where id = #{id,jdbcType=INTEGER}
+  </delete>
+  <insert id="insert" parameterType="com.mind.mind_warehouse.entity.WarehousePurchaseReturn">
+    insert into mw_warehouse_purchase_return (id, num, type, 
+      supplier_id, contact_person, tel, 
+      receive_goods_time, create_by_emp, product_id, 
+      count, product_total_price, return_num, 
+      enter_fund_status, status, is_delete, 
+      create_time, update_time)
+    values (#{id,jdbcType=INTEGER}, #{num,jdbcType=INTEGER}, #{type,jdbcType=INTEGER}, 
+      #{supplierId,jdbcType=INTEGER}, #{contactPerson,jdbcType=VARCHAR}, #{tel,jdbcType=VARCHAR}, 
+      #{receiveGoodsTime,jdbcType=TIMESTAMP}, #{createByEmp,jdbcType=INTEGER}, #{productId,jdbcType=INTEGER}, 
+      #{count,jdbcType=INTEGER}, #{productTotalPrice,jdbcType=DECIMAL}, #{returnNum,jdbcType=VARCHAR}, 
+      #{enterFundStatus,jdbcType=INTEGER}, #{status,jdbcType=INTEGER}, #{isDelete,jdbcType=INTEGER}, 
+      #{createTime,jdbcType=TIMESTAMP}, #{updateTime,jdbcType=TIMESTAMP})
+  </insert>
+  <update id="updateByPrimaryKey" parameterType="com.mind.mind_warehouse.entity.WarehousePurchaseReturn">
+    update mw_warehouse_purchase_return
+    set num = #{num,jdbcType=INTEGER},
+      type = #{type,jdbcType=INTEGER},
+      supplier_id = #{supplierId,jdbcType=INTEGER},
+      contact_person = #{contactPerson,jdbcType=VARCHAR},
+      tel = #{tel,jdbcType=VARCHAR},
+      receive_goods_time = #{receiveGoodsTime,jdbcType=TIMESTAMP},
+      create_by_emp = #{createByEmp,jdbcType=INTEGER},
+      product_id = #{productId,jdbcType=INTEGER},
+      count = #{count,jdbcType=INTEGER},
+      product_total_price = #{productTotalPrice,jdbcType=DECIMAL},
+      return_num = #{returnNum,jdbcType=VARCHAR},
+      enter_fund_status = #{enterFundStatus,jdbcType=INTEGER},
+      status = #{status,jdbcType=INTEGER},
+      is_delete = #{isDelete,jdbcType=INTEGER},
+      create_time = #{createTime,jdbcType=TIMESTAMP},
+      update_time = #{updateTime,jdbcType=TIMESTAMP}
+    where id = #{id,jdbcType=INTEGER}
+  </update>
+  <select id="selectByPrimaryKey" parameterType="java.lang.Integer" resultMap="BaseResultMap">
+    select id, num, type, supplier_id, contact_person, tel, receive_goods_time, create_by_emp, 
+    product_id, count, product_total_price, return_num, enter_fund_status, status, is_delete, 
+    create_time, update_time
+    from mw_warehouse_purchase_return
+    where id = #{id,jdbcType=INTEGER}
+  </select>
+  <select id="selectAll" resultMap="BaseResultMap">
+    select id, num, type, supplier_id, contact_person, tel, receive_goods_time, create_by_emp, 
+    product_id, count, product_total_price, return_num, enter_fund_status, status, is_delete, 
+    create_time, update_time
+    from mw_warehouse_purchase_return
+  </select>
+<!--  List<PurchaseVo> selectPurchaseVoByCons(@Param("num")Integer num,-->
+<!--  @Param("code")String code,-->
+<!--  @Param("name")String name,-->
+<!--  @Param("status")Integer status);-->
+<resultMap id="PurchaseVoMap" type="PurchaseVo" autoMapping="true">
+  <id column="purchaseId" property="purchaseId"></id>
+</resultMap>
+
+
+
+  <select id="selectPurchaseVoByCons" resultMap="PurchaseVoMap">
+    select mwpr.id purchaseId, mwpr.num purchaseNum,mp.name productName,mp.code productCode,mp.standards productStandards,
+           mp.store_unit_id productStoreUnitId,mp.price productPrice,mwpr.count purchaseCount,
+           ms.code supplierCode,ms.name supplierName,mwpr.status purchaseStatus,
+           mwpr.enter_fund_status purchaseEnterFundStatus
+        from mw_warehouse_purchase_return mwpr
+            inner join mw_product mp on mwpr.product_id=mp.id
+            inner join mw_supplier ms on mwpr.supplier_id=ms.id
+<where>
+  <if test="num != null and num != ''">
+        and mwpr.num like '%${num}%'
+  </if>
+<if test="code != null and code != ''">
+  and mp.code like '%${code}%'
+</if>
+<if test="name != null and name != ''">
+  and mp.name like '%${name}%'
+</if>
+<if test="status != null and status != ''">
+  and mwpr.status=#{status}
+</if>
+
+</where>
+  </select>
+
+<!--  List<PurchaseVo> selectPurchaseVoWithReturnByCons(@Param("returnNum")Integer num,-->
+<!--  @Param("num")String code,-->
+<!--  @Param("name")String name,-->
+<!--  @Param("status")Integer status);-->
+
+  <select id="selectPurchaseVoWithReturnByCons" resultMap="PurchaseVoMap">
+    select mwpr.id purchaseId, mwpr.num purchaseNum,mwpr.return_num purchaseReturnNum,mp.name productName,mp.code productCode,mp.standards productStandards,
+    mp.store_unit_id productStoreUnitId,mp.price productPrice,mwpr.count purchaseCount,
+    ms.code supplierCode,ms.name supplierName,mwpr.status purchaseStatus,
+    mwpr.enter_fund_status purchaseEnterFundStatus
+    from mw_warehouse_purchase_return mwpr
+    inner join mw_product mp on mwpr.product_id=mp.id
+    inner join mw_supplier ms on mwpr.supplier_id=ms.id
+    <where>
+      return_num IS NOT NULL and return_num != ''
+      <if test="num != null and num != ''">
+        and mwpr.num like '%${num}%'
+      </if>
+      <if test="returnNum != null and returnNum != ''">
+        and mwpr.return_num like '%${returnNum}%'
+      </if>
+      <if test="name != null and name != ''">
+        and mp.name like '%${name}%'
+      </if>
+      <if test="status != null and status != ''">
+        and mwpr.status=#{status}
+      </if>
+
+    </where>
+  </select>
+<!--  List<PurchaseVo> selectByIds(int[] ids);-->
+  <select id="selectByIds" resultMap="PurchaseVoMap">
+    select mwpr.id purchaseId, mwpr.num purchaseNum,mp.name productName,mp.code productCode,mp.standards productStandards,
+    mp.store_unit_id productStoreUnitId,mp.price productPrice,mwpr.count purchaseCount,
+    ms.code supplierCode,ms.name supplierName,mwpr.status purchaseStatus,
+    mwpr.enter_fund_status purchaseEnterFundStatus
+    from mw_warehouse_purchase_return mwpr
+    inner join mw_product mp on mwpr.product_id=mp.id
+    inner join mw_supplier ms on mwpr.supplier_id=ms.id
+<where>
+  mwpr.id in
+    <foreach collection="ids" open="(" separator="," close=")" item="id" >
+      #{id}
+    </foreach>
+</where>
+  </select>
+<!--  <select id="selectByIds" resultMap="BaseResultMap">-->
+<!--    select *-->
+<!--    from mw_warehouse-->
+<!--    <where>-->
+<!--      <foreach collection="ids" separator="," open="id in(" close=")" item="id">-->
+<!--        #{id}-->
+<!--      </foreach>-->
+<!--    </where>-->
+<!--  </select>-->
+</mapper>

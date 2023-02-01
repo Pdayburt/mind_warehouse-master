@@ -1,0 +1,147 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.mind.mind_warehouse.mapper.WarehouseInOutSubMapper">
+  <resultMap id="BaseResultMap" type="com.mind.mind_warehouse.entity.WarehouseInOutSub">
+    <id column="id" jdbcType="INTEGER" property="id" />
+    <result column="in_out_id" jdbcType="INTEGER" property="inOutId" />
+    <result column="product_id" jdbcType="INTEGER" property="productId" />
+    <result column="change_num" jdbcType="INTEGER" property="changeNum" />
+    <result column="total_price" jdbcType="DECIMAL" property="totalPrice" />
+    <result column="warehouse_id" jdbcType="INTEGER" property="warehouseId" />
+    <result column="storage_id" jdbcType="INTEGER" property="storageId" />
+    <result column="create_time" jdbcType="TIMESTAMP" property="createTime" />
+    <result column="update_time" jdbcType="TIMESTAMP" property="updateTime" />
+    <result column="is_delete" jdbcType="INTEGER" property="isDelete" />
+  </resultMap>
+  <delete id="deleteByPrimaryKey" parameterType="java.lang.Integer">
+    delete from mw_warehouse_in_out_sub
+    where id = #{id,jdbcType=INTEGER}
+  </delete>
+  <insert id="insert" parameterType="com.mind.mind_warehouse.entity.WarehouseInOutSub">
+    insert into mw_warehouse_in_out_sub (id, in_out_id, product_id, 
+      change_num, total_price, warehouse_id, 
+      storage_id, create_time, update_time, 
+      is_delete)
+    values (#{id,jdbcType=INTEGER}, #{inOutId,jdbcType=INTEGER}, #{productId,jdbcType=INTEGER}, 
+      #{changeNum,jdbcType=INTEGER}, #{totalPrice,jdbcType=DECIMAL}, #{warehouseId,jdbcType=INTEGER}, 
+      #{storageId,jdbcType=INTEGER}, #{createTime,jdbcType=TIMESTAMP}, #{updateTime,jdbcType=TIMESTAMP}, 
+      #{isDelete,jdbcType=INTEGER})
+  </insert>
+  <update id="updateByPrimaryKey" parameterType="com.mind.mind_warehouse.entity.WarehouseInOutSub">
+    update mw_warehouse_in_out_sub
+    set in_out_id = #{inOutId,jdbcType=INTEGER},
+      product_id = #{productId,jdbcType=INTEGER},
+      change_num = #{changeNum,jdbcType=INTEGER},
+      total_price = #{totalPrice,jdbcType=DECIMAL},
+      warehouse_id = #{warehouseId,jdbcType=INTEGER},
+      storage_id = #{storageId,jdbcType=INTEGER},
+      create_time = #{createTime,jdbcType=TIMESTAMP},
+      update_time = #{updateTime,jdbcType=TIMESTAMP},
+      is_delete = #{isDelete,jdbcType=INTEGER}
+    where id = #{id,jdbcType=INTEGER}
+  </update>
+  <select id="selectByPrimaryKey" parameterType="java.lang.Integer" resultMap="BaseResultMap">
+    select id, in_out_id, product_id, change_num, total_price, warehouse_id, storage_id, 
+    create_time, update_time, is_delete
+    from mw_warehouse_in_out_sub
+    where id = #{id,jdbcType=INTEGER}
+  </select>
+  <select id="selectAll" resultMap="BaseResultMap">
+    select id, in_out_id, product_id, change_num, total_price, warehouse_id, storage_id, 
+    create_time, update_time, is_delete
+    from mw_warehouse_in_out_sub
+  </select>
+
+
+
+
+  <resultMap id="WarehouseInOutSubVoMap" type="WarehouseInOutSubVo" autoMapping="true">
+    <id column="id" property="id"></id>
+  </resultMap>
+
+  <select id="selectOutNum" resultMap="WarehouseInOutSubVoMap">
+    SELECT SUM(change_num) as changeNum
+    FROM mw_warehouse_in_out_sub
+    WHERE is_delete = 0
+  </select>
+
+  <!-- List<QuarterVo> selectQuarterByLikeIn(@Param("pcode") String productCode,@Param("pname") String productName,
+                                        @Param("wname") String warehouseName);-->
+  <resultMap id="QuarterVoMap" type="QuarterVo">
+    <id column="productId" property="productId"></id>
+    <result column="productName" property="productName"></result>
+    <result column="productCode" property="productCode"></result>
+    <result column="unitName" property="unitName"></result>
+    <result column="productType" property="productType"></result>
+    <result column="warehouseName" property="warehouseName"></result>
+    <result column="stock" property="stock"></result>
+    <result column="sumCount" property="inNum"></result>
+  </resultMap>
+
+  <select id="selectQuarterByLikeIn" resultMap="QuarterVoMap">
+    select p.id as productId,p.`code` as productCode,p.`name` as productName,u.`name` as unitName,
+    t.`name` as productType,s.stock,w.`name` as warehouseName,temp.sumCount
+    from mw_product p
+    LEFT JOIN mw_units u on p.store_unit_id=u.id
+    LEFT JOIN mw_product_type t on p.type_id=t.id
+    LEFT JOIN mw_product_stock s on p.id=s.product_id
+    LEFT JOIN mw_warehouse w on s.warehouse_id=w.id
+    LEFT JOIN
+    (select ANY_VALUE(i.order_num) as inum,ios.product_id,SUM(ios.change_num) as sumCount
+    from mw_warehouse_in_out io
+    INNER JOIN mw_warehouse_in i on io.change_id=i.order_num
+    LEFT JOIN mw_warehouse_in_out_sub ios on io.id=ios.in_out_id
+    GROUP BY ios.product_id) temp on p.id=temp.product_id
+    <where>
+      <if test="pcode != null and pcode.toString().trim() != ''">
+        and p.code like concat('%',#{pcode},'%')
+      </if>
+      <if test="pname != null and pname.toString().trim() != ''">
+        and p.name like concat('%',#{pname},'%')
+      </if>
+      <if test="wname != null and wname.toString().trim() != ''">
+        and w.name like concat('%',#{wname},'%')
+      </if>
+    </where>
+  </select>
+
+  <resultMap id="QuarterVoOutMap" type="QuarterVo">
+    <id column="productId" property="productId"></id>
+    <result column="productName" property="productName"></result>
+    <result column="productCode" property="productCode"></result>
+    <result column="unitName" property="unitName"></result>
+    <result column="productType" property="productType"></result>
+    <result column="warehouseName" property="warehouseName"></result>
+    <result column="stock" property="stock"></result>
+    <result column="sumCount" property="outNum"></result>
+
+  </resultMap>
+  <select id="selectQuarterByLikeOut" resultMap="QuarterVoOutMap">
+    select p.id as productId,p.`code` as productCode,p.`name` as productName,u.`name` as unitName,
+    t.`name` as productType,s.stock,w.`name` as warehouseName,temp.sumCount
+    from mw_product p
+    LEFT JOIN mw_units u on p.store_unit_id=u.id
+    LEFT JOIN mw_product_type t on p.type_id=t.id
+    LEFT JOIN mw_product_stock s on p.id=s.product_id
+    LEFT JOIN mw_warehouse w on s.warehouse_id=w.id
+    LEFT JOIN
+    (select ANY_VALUE(o.order_num) as inum,ios.product_id,SUM(ios.change_num) as sumCount
+    from mw_warehouse_in_out io
+    INNER JOIN mw_warehouse_out o on io.change_id=o.order_num
+    LEFT JOIN mw_warehouse_in_out_sub ios on io.id=ios.in_out_id
+    GROUP BY ios.product_id) temp on p.id=temp.product_id
+    <where>
+      <if test="pcode != null and pcode.toString().trim() != ''">
+        and p.code like concat('%',#{pcode},'%')
+      </if>
+      <if test="pname != null and pname.toString().trim() != ''">
+        and p.name like concat('%',#{pname},'%')
+      </if>
+      <if test="wname != null and wname.toString().trim() != ''">
+        and w.name like concat('%',#{wname},'%')
+      </if>
+    </where>
+  </select>
+
+
+</mapper>

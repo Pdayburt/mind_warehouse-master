@@ -1,0 +1,245 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.mind.mind_warehouse.mapper.WarehouseMoveMapper">
+
+    <!--<resultMap id="warehouseMoveMap" type="WarehouseMoveVo" autoMapping="true">
+      <id column="id" property="id"></id>
+        <association property="productStockVo" javaType="ProductStockVo" autoMapping="true">
+            <id column="psid" property="id"></id>
+            <association property="product" javaType="Product" autoMapping="true">
+                <id column="id" property="id"></id>
+            </association>
+            <association property="warehouse" javaType="Warehouse" autoMapping="true">
+                <id column="id" property="id"></id>
+            </association>
+            <association property="storage" javaType="Storage" autoMapping="true">
+                <id column="id" property="id"></id>
+            </association>
+        </association>
+    </resultMap>-->
+
+    <resultMap id="warehouseMoveMap" type="WarehouseMoveVo" autoMapping="true">
+        <id column="id" property="id"></id>
+    </resultMap>
+
+    <insert id="insert" parameterType="WarehouseMoveVo" useGeneratedKeys="true" keyProperty="id" keyColumn="id">
+        insert into mw_warehouse_move (move_num, product_id, batch, old_warehouse_id, old_storage_id, new_warehouse_id,
+                                       new_storage_id, create_time, update_time, is_delete,note,move_type)
+        values (#{moveNum}, #{productId}, #{batch}, #{oldWarehouseId}, #{oldStorageId}, #{newWarehouseId},
+                #{newStorageId}, #{createTime}, #{updateTime}, 0,#{note},#{moveType})
+    </insert>
+
+    <update id="update" parameterType="WarehouseMoveVo">
+        update mw_warehouse_move
+        set
+            new_storage_id   = #{newStorageId},
+            update_time      = #{updateTime},
+            move_type = #{moveType},
+            note      = #{wmnote},
+            is_delete   = 0
+        where id = #{wmid}
+
+    </update>
+
+
+    <delete id="deleteWarehouseMoveById" parameterType="int">
+        delete
+        from mw_warehouse_move wm
+        where wm.id = #{id}
+    </delete>
+
+    <select id="selectStockIdByMoveId" parameterType="int" resultType="int">
+        select ps.id as psid
+        from mw_warehouse_move wm
+                 inner join mw_product_stock ps
+                            on wm.product_id = ps.product_id
+        where wm.id = #{mid} and wm.is_delete = 0
+    </select>
+    
+    
+    <select id="selectMoveNumCount" resultMap="warehouseMoveMap">
+        SELECT count(move_num) as moveNumCount
+        FROM mw_warehouse_move
+        where is_delete = 0
+    </select>
+
+
+
+
+    <select id="selectWarehouseMoveById" resultMap="warehouseMoveMap">
+
+        SELECT * from
+        (SELECT wm.id as wmid,wm.product_id as pid,wm.move_num,wm.create_time,wm.batch,wm.move_type,wm.old_warehouse_id as owid,wm.old_storage_id as osid,wm.note as wmnote,ow.name as owname,os.name as osname,nw.name as nwname,ns.name as nsname,
+                wm.new_storage_id as nsid
+        from mw_warehouse_move wm LEFT JOIN mw_warehouse ow ON wm.old_warehouse_id = ow.id
+        LEFT JOIN mw_storage os on wm.old_storage_id = os.id
+        LEFT JOIN mw_warehouse nw ON wm.new_warehouse_id = nw.id
+        LEFT JOIN mw_storage ns on wm.new_storage_id = ns.id ) as a INNER JOIN
+        (SELECT ps.product_id as psid,ps.stock,p.name as pname,p.code as pcode,p.standards,p.price
+        from mw_product_stock ps LEFT JOIN mw_product p on ps.product_id = p.id) as b on a.pid = b.psid
+         where a.wmid = #{wwmid}
+
+    </select>
+
+    <select id="selectAllProduct" resultMap="warehouseMoveMap">
+
+        SELECT ps.id as psid,ps.product_id as productId,ps.stock,ps.warehouse_id as oldWarehouseId,ps.storage_id as oldStorageId, w.name as wname,s.name as sname,p.code as pcode,p.name as pname,p.standards,
+        p.price,p.weight,u.name as uname,p.pakage_type as pakageType,pt.name as ptname
+        FROM mw_product_stock ps LEFT JOIN mw_warehouse w
+        on ps.warehouse_id = w.id
+        LEFT JOIN mw_storage s
+        on ps.storage_id = s.id
+        LEFT JOIN mw_product p
+        on ps.product_id = p.id
+        left JOIN mw_units u
+        on p.store_unit_id = u.id
+        LEFT JOIN mw_product_type pt
+        on p.type_id = pt.id
+
+        <where>
+            <if test="pname != null and pname.toString().trim() != ''">
+                and p.name like '%${pname}%'
+            </if>
+            <if test="pcode != null and pcode.toString().trim() != ''">
+                and p.code like '%${pcode}%'
+            </if>
+        </where>
+
+    </select>
+
+    <select id="selectByIds" resultMap="warehouseMoveMap">
+        SELECT * from
+            (SELECT wm.id as wmid,wm.product_id as pid,wm.create_time,wm.move_num,wm.batch,wm.move_type,wm.old_warehouse_id as owid,wm.old_storage_id as osid,ow.name as owname,os.name as osname,nw.name as nwname,ns.name as nsname,wm.note as wmnote,
+                    wm.new_storage_id as nsid
+             from mw_warehouse_move wm LEFT JOIN mw_warehouse ow ON wm.old_warehouse_id = ow.id
+                                       LEFT JOIN mw_storage os on wm.old_storage_id = os.id
+                                       LEFT JOIN mw_warehouse nw ON wm.new_warehouse_id = nw.id
+                                       LEFT JOIN mw_storage ns on wm.new_storage_id = ns.id ) as a INNER JOIN
+            (SELECT wm.id as wmid1, ps.product_id as psid,ps.stock,p.name as pname,p.code as pcode,p.price,p.standards,
+                    p.pakage_type,p.weight
+             from mw_product_stock ps LEFT JOIN mw_product p on ps.product_id = p.id
+                                      INNER JOIN mw_warehouse_move wm on ps.product_id = wm.product_id) as b on a.wmid = b.wmid1
+        <where>
+            <foreach collection="ids" item="id" open="a.wmid in(" separator="," close=")">
+                #{id}
+            </foreach>
+        </where>
+
+
+    </select>
+
+
+    <select id="selectWarehouseMoveBuyCons" resultMap="warehouseMoveMap">
+        SELECT * from
+        (SELECT wm.id as wmid,wm.product_id as pid,wm.create_time,wm.move_num,wm.batch,wm.move_type,wm.old_warehouse_id as owid,wm.old_storage_id as osid,ow.name as owname,os.name as osname,nw.name as nwname,ns.name as nsname,wm.note as wmnote,
+        wm.new_storage_id as nsid
+        from mw_warehouse_move wm LEFT JOIN mw_warehouse ow ON wm.old_warehouse_id = ow.id
+        LEFT JOIN mw_storage os on wm.old_storage_id = os.id
+        LEFT JOIN mw_warehouse nw ON wm.new_warehouse_id = nw.id
+        LEFT JOIN mw_storage ns on wm.new_storage_id = ns.id ) as a INNER JOIN
+        (SELECT wm.id as wmid1, ps.product_id as psid,ps.stock,p.name as pname,p.code as pcode,p.price,p.standards,
+        p.pakage_type,p.weight
+        from mw_product_stock ps LEFT JOIN mw_product p on ps.product_id = p.id
+        INNER JOIN mw_warehouse_move wm on ps.product_id = wm.product_id) as b on a.wmid = b.wmid1
+        <where>
+            <if test="moveNum != null and moveNum.toString().trim() != ''">
+                and a.move_num like '%${moveNum}%'
+            </if>
+            <if test="moveType != 0">
+                and a.move_type = #{moveType}
+            </if>
+        </where>
+    </select>
+    
+
+    <select id="selectProductBuyCons" resultMap="warehouseMoveMap">
+        SELECT * from
+        (SELECT wm.id as wmid,wm.product_id as pid,wm.create_time,wm.move_num,wm.batch,wm.move_type,wm.old_warehouse_id as owid,wm.old_storage_id as osid,ow.name as owname,os.name as osname,nw.name as nwname,ns.name as nsname
+        from mw_warehouse_move wm LEFT JOIN mw_warehouse ow ON wm.old_warehouse_id = ow.id
+        LEFT JOIN mw_storage os on wm.old_storage_id = os.id
+        LEFT JOIN mw_warehouse nw ON wm.new_warehouse_id = nw.id
+        LEFT JOIN mw_storage ns on wm.new_storage_id = ns.id ) as a INNER JOIN
+        (SELECT wm.id as wmid1, ps.product_id as psid,p.name as pname,p.code as pcode,p.price,
+        p.pakage_type,p.weight
+        from mw_product_stock ps LEFT JOIN mw_product p on ps.product_id = p.id
+        INNER JOIN mw_warehouse_move wm on ps.product_id = wm.product_id) as b on a.wmid = b.wmid1
+        <where>
+            <if test="pname != null and pname.toString().trim() != ''">
+                and b.pname like '%${pname}%'
+            </if>
+            <if test="pcode != null and pcode.toString().trim() != ''">
+            and b.pcode like '%${pcode}%'
+            </if>
+        </where>
+    </select>
+
+    <resultMap id="SalableStockVoMap" type="SalableStockVo" autoMapping="true">
+        <id column="psid" property="psid"></id>
+    </resultMap>
+
+    <select id="selectBySalableStockIds" resultMap="SalableStockVoMap">
+        SELECT ps.id  as psid,
+               p.code as pcode,
+               p.name as pname,
+               p.standards,
+               pt.name
+                      as ptname,
+               u.name as uname,
+               ps.stock
+        FROM mw_product_stock ps
+                 LEFT JOIN mw_product p
+                           on ps.product_id = p.id
+                 LEFT JOIN mw_product_type pt
+                           on p.type_id = pt.id
+                 LEFT JOIN mw_units u
+                           on p.store_unit_id = u.id
+        <where>
+            <foreach collection="ids" item="id" open="ps.id in(" separator="," close=")">
+                #{id}
+            </foreach>
+        </where>
+    </select>
+    
+    
+    <select id="selectSalableStockByCons" resultMap="warehouseMoveMap">
+        SELECT ps.id  as psid,
+               p.code as pcode,
+               p.name as pname,
+               p.standards,
+               pt.name
+                      as ptname,
+               u.name as uname,
+               ps.stock
+        FROM mw_product_stock ps
+                 LEFT JOIN mw_product p
+                           on ps.product_id = p.id
+                 LEFT JOIN mw_product_type pt
+                           on p.type_id = pt.id
+                 LEFT JOIN mw_units u
+                           on p.store_unit_id = u.id
+        <where>
+            <if test="pcode != null and pcode.toString().trim() != ''">
+                and p.code like '%${pcode}%'
+            </if>
+            <if test="pname != null and pname.toString().trim() != ''">
+                and p.name like '%${pname}%'
+            </if>
+        </where>
+    </select>
+
+    <select id="selectFinancialCategoryByCons" resultMap="warehouseMoveMap">
+        SELECT ft.id as ftid, ft.code as ftcode, ft.name as ftname,ft.create_time,ft.`note` as ftnote
+        FROM mw_finance_type ft
+        <where>
+            <if test="ftname != null and ftname.toString().trim() != ''">
+                and ft.name like '%${ftname}%'
+            </if>
+            and is_delete = 0
+        </where>
+    </select>
+
+
+
+
+
+</mapper>

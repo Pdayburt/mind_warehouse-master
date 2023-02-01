@@ -1,0 +1,78 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.mind.mind_warehouse.mapper.EquipmentMapper">
+  <resultMap id="BaseResultMap" type="com.mind.mind_warehouse.entity.Equipment">
+    <id column="id" jdbcType="INTEGER" property="id" />
+    <result column="code" jdbcType="VARCHAR" property="code" />
+    <result column="name" jdbcType="VARCHAR" property="name" />
+    <result column="is_author" jdbcType="INTEGER" property="isAuthor" />
+    <result column="author_code" jdbcType="VARCHAR" property="authorCode" />
+    <result column="status" jdbcType="INTEGER" property="status" />
+    <result column="create_time" jdbcType="TIMESTAMP" property="createTime" />
+    <result column="update_time" jdbcType="TIMESTAMP" property="updateTime" />
+    <result column="is_delete" jdbcType="INTEGER" property="isDelete" />
+    <result column="note" jdbcType="VARCHAR" property="note" />
+  </resultMap>
+  <delete id="deleteByPrimaryKey" parameterType="java.lang.Integer">
+    delete from mw_equipment
+    where id = #{id,jdbcType=INTEGER}
+  </delete>
+  <insert id="insert" parameterType="com.mind.mind_warehouse.entity.Equipment">
+    insert into mw_equipment (code,name,is_author,
+      author_code, status, create_time, 
+      update_time, is_delete, note
+      )
+    values (#{code,jdbcType=VARCHAR},#{name,jdbcType=VARCHAR}, #{isAuthor,jdbcType=INTEGER},
+      #{authorCode,jdbcType=VARCHAR}, #{status,jdbcType=INTEGER}, #{createTime,jdbcType=TIMESTAMP}, 
+      #{updateTime,jdbcType=TIMESTAMP}, 0, #{note,jdbcType=VARCHAR}
+      )
+  </insert>
+  <update id="updateByPrimaryKey" parameterType="com.mind.mind_warehouse.entity.Equipment">
+    update mw_equipment
+    set name = #{name,jdbcType=VARCHAR},
+      is_author = #{isAuthor,jdbcType=INTEGER},
+      author_code = #{authorCode,jdbcType=VARCHAR},
+      status = #{status,jdbcType=INTEGER},
+      update_time = #{updateTime,jdbcType=TIMESTAMP},
+      is_delete = #{isDelete,jdbcType=INTEGER},
+      note = #{note,jdbcType=VARCHAR}
+    where id = #{id,jdbcType=INTEGER}
+  </update>
+  <select id="selectByPrimaryKey" parameterType="java.lang.Integer" resultMap="BaseResultMap">
+    select id, code,name, is_author, author_code, status, create_time, update_time, is_delete,
+    note
+    from mw_equipment
+    where id = #{id,jdbcType=INTEGER}
+  </select>
+  <select id="selectAll" resultMap="BaseResultMap">
+    select id, code,name, is_author, author_code, status, create_time, update_time, is_delete,
+    note
+    from mw_equipment
+    where is_delete = 0
+  </select>
+
+
+  <select id="selectEquipmentByCons" resultMap="BaseResultMap">
+    select * from mw_equipment e
+    <where>
+      <if test="code != null and code.toString().trim() != ''">
+        and code like '%${code}%'
+      </if>
+      <if test="name != null and name.toString().trim() != ''">
+        and name like '%${name}%'
+      </if>
+      and is_delete = 0
+    </where>
+  </select>
+
+  <select id="selectByIds" resultMap="BaseResultMap">
+    select * from mw_equipment e
+    <where>
+      <foreach collection="ids" item="id" open="e.id in(" separator="," close=")">
+        #{id}
+      </foreach>
+    </where>
+
+  </select>
+
+</mapper>

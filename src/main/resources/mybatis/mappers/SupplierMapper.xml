@@ -1,0 +1,88 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.mind.mind_warehouse.mapper.SupplierMapper">
+  <resultMap id="BaseResultMap" type="com.mind.mind_warehouse.entity.Supplier">
+    <id column="id" jdbcType="INTEGER" property="id" />
+    <result column="code" jdbcType="VARCHAR" property="code" />
+    <result column="name" jdbcType="VARCHAR" property="name" />
+    <result column="type" jdbcType="INTEGER" property="type" />
+    <result column="tel" jdbcType="VARCHAR" property="tel" />
+    <result column="fax" jdbcType="VARCHAR" property="fax" />
+    <result column="email" jdbcType="VARCHAR" property="email" />
+    <result column="contact" jdbcType="VARCHAR" property="contact" />
+    <result column="address" jdbcType="VARCHAR" property="address" />
+    <result column="creat_time" jdbcType="TIMESTAMP" property="creatTime" />
+    <result column="update_time" jdbcType="TIMESTAMP" property="updateTime" />
+    <result column="is_delete" jdbcType="INTEGER" property="isDelete" />
+  </resultMap>
+  <delete id="deleteByPrimaryKey" parameterType="java.lang.Integer">
+    delete from mw_supplier
+    where id = #{id,jdbcType=INTEGER}
+  </delete>
+  <insert id="insert" parameterType="com.mind.mind_warehouse.entity.Supplier">
+    insert into mw_supplier (id, code, name, 
+      type, tel, fax, email, 
+      contact, address, creat_time, 
+      update_time, is_delete)
+    values (#{id,jdbcType=INTEGER}, #{code,jdbcType=VARCHAR}, #{name,jdbcType=VARCHAR}, 
+      #{type,jdbcType=INTEGER}, #{tel,jdbcType=VARCHAR}, #{fax,jdbcType=VARCHAR}, #{email,jdbcType=VARCHAR}, 
+      #{contact,jdbcType=VARCHAR}, #{address,jdbcType=VARCHAR}, #{creatTime,jdbcType=TIMESTAMP}, 
+      #{updateTime,jdbcType=TIMESTAMP}, #{isDelete,jdbcType=INTEGER})
+  </insert>
+  <update id="updateByPrimaryKey" parameterType="com.mind.mind_warehouse.entity.Supplier">
+    update mw_supplier
+    set code = #{code,jdbcType=VARCHAR},
+      name = #{name,jdbcType=VARCHAR},
+      type = #{type,jdbcType=INTEGER},
+      tel = #{tel,jdbcType=VARCHAR},
+      fax = #{fax,jdbcType=VARCHAR},
+      email = #{email,jdbcType=VARCHAR},
+      contact = #{contact,jdbcType=VARCHAR},
+      address = #{address,jdbcType=VARCHAR},
+      creat_time = #{creatTime,jdbcType=TIMESTAMP},
+      update_time = #{updateTime,jdbcType=TIMESTAMP},
+      is_delete = #{isDelete,jdbcType=INTEGER}
+    where id = #{id,jdbcType=INTEGER}
+  </update>
+  <select id="selectByPrimaryKey" parameterType="java.lang.Integer" resultMap="BaseResultMap">
+    select id, code, name, type, tel, fax, email, contact, address, creat_time, update_time, 
+    is_delete
+    from mw_supplier
+    where id = #{id,jdbcType=INTEGER}
+  </select>
+  <select id="selectAll" resultMap="BaseResultMap">
+    select id, code, name, type, tel, fax, email, contact, address, creat_time, update_time, 
+    is_delete
+    from mw_supplier
+  </select>
+
+  <!--int deleteById(Integer id);-->
+  <update id="deleteById" parameterType="Integer">
+    update mw_supplier
+    set is_delete = 1
+    where id = #{id,jdbcType=INTEGER}
+  </update>
+
+  <!--List<Supplier> selectByLike(@Param("code") String code,@Param("name") String name,
+  @Param("type") Integer type,@Param("tel") String tel);-->
+  <select id="selectByLike" resultMap="BaseResultMap">
+    select id, code, name, type, tel, fax, email, contact, address, creat_time, update_time,
+           is_delete
+    from mw_supplier
+    <where>
+      is_delete=0
+      <if test="code != null and code.toString().trim() != ''">
+        and code like concat('%',#{code},'%')
+      </if>
+      <if test="name != null and name.toString().trim() != ''">
+        and name like concat('%',#{name},'%')
+      </if>
+      <if test="type != null">
+        and type like concat('%',#{type},'%')
+      </if>
+      <if test="tel != null and tel.toString().trim() != ''">
+        and tel like concat('%',#{tel},'%')
+      </if>
+    </where>
+  </select>
+</mapper>
